@@ -22,3 +22,4 @@ Scraping is done once and results are sent to all relevant webhooks, making the 
 - [ ] Software Scraping
 - [ ] Monthly Scraping
 - [ ] API for registering new webhooks to different bundles rather than current static implementation
+- [ ] Rework entire system as Serverless App
