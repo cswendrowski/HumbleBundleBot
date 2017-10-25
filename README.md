@@ -6,7 +6,7 @@ Each Bundle can be independently scanned and sent to a different channel, allowi
 
 Scraping is done once and results are sent to all relevant webhooks, making the system extremely cheap to run.
 
-![](https://puu.sh/y6wI0/4087a005b8.png)
+![](https://puu.sh/y6xli/fbb05197e7.png)
 
 ![](https://puu.sh/y6wJs/0426467d2a.png)
 
