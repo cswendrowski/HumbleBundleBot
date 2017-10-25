@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace HumbleBundleBot
 {
-    class Program
+    public class HumbleBookScraper : HumbleScraper
     {
-        static void Main(string[] args)
+        public override string GetBaseUrl()
         {
+            return "https://www.humblebundle.com/books";
         }
     }
 }
