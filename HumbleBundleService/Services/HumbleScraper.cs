@@ -72,25 +72,31 @@ namespace HumbleBundleBot
                     foreach (var gameTitle in section.CssSelect(".dd-image-box-caption"))
                     {
                         var title = gameTitle.InnerText.CleanInnerText();
-                        foundGames.Add(new HumbleGame
+                        if (!foundGames.Any(x => x.Title == title))
                         {
-                            Bundle = bundleName,
-                            URL = finalUrl,
-                            Title = title,
-                            Section = sectionTitle
-                        });
+                            foundGames.Add(new HumbleGame
+                            {
+                                Bundle = bundleName,
+                                URL = finalUrl,
+                                Title = title,
+                                Section = sectionTitle
+                            });
+                        }
                     }
 
                     if (section.CssSelect(".fi-content-body").Any())
                     {
                         var title = section.CssSelect(".fi-content-body").First().InnerText.CleanInnerText();
-                        foundGames.Add(new HumbleGame
+                        if (!foundGames.Any(x => x.Title == title))
                         {
-                            Bundle = bundleName,
-                            URL = finalUrl,
-                            Title = title,
-                            Section = sectionTitle
-                        });
+                            foundGames.Add(new HumbleGame
+                            {
+                                Bundle = bundleName,
+                                URL = finalUrl,
+                                Title = title,
+                                Section = sectionTitle
+                            });
+                        }
                     }
                 }
             }
