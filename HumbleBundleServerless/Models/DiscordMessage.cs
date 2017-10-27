@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HumbleBundleBot
 {
@@ -32,6 +29,10 @@ namespace HumbleBundleBot
 
         public int color { get; set; }
 
+        public AuthorField author { get; set; } = new AuthorField();
+
+        public ImageField image { get; set; } = new ImageField();
+
         public List<EmbedField> fields { get; set; } = new List<EmbedField>();
     }
 
@@ -42,5 +43,17 @@ namespace HumbleBundleBot
         public String value { get; set; }
 
         public bool inline { get; set; } = false;
+    }
+
+    public class AuthorField
+    {
+        public String name { get; set; }
+
+        public String url { get; set; }
+    }
+
+    public class ImageField
+    {
+        public String url { get; set; }
     }
 }

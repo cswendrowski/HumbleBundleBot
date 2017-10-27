@@ -40,14 +40,26 @@ namespace HumbleBundleBot
             VisitOtherPages(response);
         }
 
-        private static string GetBundleName(HtmlNode response)
+        private string GetBundleName(HtmlNode response)
         {
             return response.CssSelect("#active-subtab").First().InnerText.CleanInnerText();
         }
 
+        private string GetBundleDescription(HtmlNode response)
+        {
+            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:description").Attributes["content"].Value;
+        }
+
+        private string GetBundleImageUrl(HtmlNode response)
+        {
+            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:image").Attributes["content"].Value;
+        }
+
         private void ScrapeSections(HtmlNode response, string finalUrl)
         {
-            string bundleName = GetBundleName(response);
+            var bundleName = GetBundleName(response);
+            var bundleDescrption = GetBundleDescription(response);
+            var bundleImageUrl = GetBundleImageUrl(response);
 
             foreach (var section in response.CssSelect(".dd-game-row"))
             {
@@ -72,11 +84,11 @@ namespace HumbleBundleBot
                     continue;
                 }
 
-                FindGamesInSection(finalUrl, bundleName, section, sectionTitle);
+                FindGamesInSection(finalUrl, bundleName, bundleDescrption, bundleImageUrl, section, sectionTitle);
             }
         }
 
-        private void FindGamesInSection(string finalUrl, string bundleName, HtmlNode section, string sectionTitle)
+        private void FindGamesInSection(string finalUrl, string bundleName, string bundleDescription, string bundleImageUrl, HtmlNode section, string sectionTitle)
         {
             foreach (var gameTitle in section.CssSelect(".dd-image-box-caption"))
             {
@@ -86,6 +98,8 @@ namespace HumbleBundleBot
                     foundGames.Add(new HumbleGame
                     {
                         Bundle = bundleName,
+                        BundleDescription = bundleDescription,
+                        BundleImageUrl = bundleImageUrl,
                         URL = finalUrl,
                         Title = title,
                         Section = sectionTitle
@@ -101,6 +115,8 @@ namespace HumbleBundleBot
                     foundGames.Add(new HumbleGame
                     {
                         Bundle = bundleName,
+                        BundleDescription = bundleDescription,
+                        BundleImageUrl = bundleImageUrl,
                         URL = finalUrl,
                         Title = title,
                         Section = sectionTitle
@@ -126,6 +142,8 @@ namespace HumbleBundleBot
     public class HumbleGame
     {
         public string Bundle { get; set; }
+        public string BundleDescription { get; set; }
+        public string BundleImageUrl { get; set; }
         public string URL { get; set; }
         public string Section { get; set; }
         public string Title { get; set; }

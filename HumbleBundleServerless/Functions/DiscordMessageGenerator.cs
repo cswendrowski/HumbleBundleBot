@@ -13,24 +13,39 @@ namespace HumbleBundleServerless
     {
         [FunctionName("DiscordMessageGenerator")]
         public static void Run(
-            [QueueTrigger("bundlequeue")] BundleQueue myQueueItem,
+            [QueueTrigger("bundlequeue")] BundleQueue queuedBundle,
             [Queue("messagequeue")] ICollector<DiscordMessage> messageQueue,
+            [Table("webhookRegistration")] IQueryable<WebhookRegistrationEntity> existingWebhooks,
             TraceWriter log)
         {
-            log.Info($"C# Queue trigger function processed: {myQueueItem.Bundle.Name}");
+            log.Info($"C# Queue trigger function processed: {queuedBundle.Bundle.Name}");
 
-            var bundle = myQueueItem.Bundle;
+            var bundle = queuedBundle.Bundle;
 
-            QueueMessagesToAllWebhooks(messageQueue, new DiscordWebhookPayload()
-            {
-                content = bundle.URL
-            });
+            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Type);
+
+            log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Type}");
 
 
             var message = new DiscordWebhookPayload
             {
                 embeds = new List<DiscordEmbed>()
             };
+
+            message.embeds.Add(new DiscordEmbed()
+            {
+                url = bundle.URL,
+                title = bundle.Description,
+                image = new ImageField()
+                {
+                    url = bundle.ImageUrl
+                },
+                author = new AuthorField()
+                {
+                    name = "Humble Bundle",
+                    url = bundle.URL
+                }
+            });
 
             foreach (var section in bundle.Sections)
             {
@@ -49,16 +64,19 @@ namespace HumbleBundleServerless
                 message.embeds.Add(embed);
             }
 
-            QueueMessagesToAllWebhooks(messageQueue, message);
+            foreach (var webhook in webhooks)
+            {
+                messageQueue.Add(new DiscordMessage
+                {
+                    WebhookUrl = webhook,
+                    Payload = message
+                });
+            }
         }
 
-        private static void QueueMessagesToAllWebhooks(ICollector<DiscordMessage> messageQueue, DiscordWebhookPayload message)
+        private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type)
         {
-            messageQueue.Add(new DiscordMessage
-            {
-                WebhookUrl = "https://discordapp.com/api/webhooks/372539156921974784/dhmYS4QhYhlSGUT3FJQR_miXDvnd5WsFZNauhHw3xlRqTKNyL61xTngB44kr0U8QpsKS",
-                Payload = message
-            });
+            return existingWebhooks.Where(x => x.PartitionKey == type.ToString()).Select(x => x.Webhook).ToList();
         }
     }
 }

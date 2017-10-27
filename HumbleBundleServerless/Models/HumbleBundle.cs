@@ -7,6 +7,8 @@ namespace HumbleBundleServerless.Models
     {
         public String Name { get; set; }
         public String URL { get; set; }
+        public String Description { get; set; }
+        public String ImageUrl { get; set; }
         public List<HumbleSection> Sections { get; set; } = new List<HumbleSection>();
     }
 

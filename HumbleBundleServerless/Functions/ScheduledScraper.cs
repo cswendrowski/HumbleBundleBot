@@ -11,7 +11,7 @@ namespace HumbleBundleServerless
     public static class ScheduledScraper
     {
         [FunctionName("ScheduledScraper")]
-        public static void Run([TimerTrigger(" 0 0 */4 * * *")]TimerInfo myTimer,
+        public static void Run([TimerTrigger("*/15 * * * * *")]TimerInfo myTimer,
             [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentBundles,
             [Table("humbleBundles")] ICollector<HumbleBundleEntity> bundlesTable,
             [Queue("bundlequeue")] ICollector<BundleQueue> bundleQueue,
@@ -61,7 +61,9 @@ namespace HumbleBundleServerless
                 var bundle = new HumbleBundle
                 {
                     Name = bundleResult.Key,
-                    URL = bundleResult.First().URL
+                    URL = bundleResult.First().URL,
+                    Description = bundleResult.First().BundleDescription,
+                    ImageUrl = bundleResult.First().BundleImageUrl
                 };
 
                 foreach (var section in bundleResult.GroupBy(x => x.Section))
