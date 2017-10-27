@@ -17,7 +17,7 @@ Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/
 
 ```
 {
- 	  "type" : <Valid Type Code>,
+    "type" : <Valid Type Code>,
     "webhook" : "<YOUR DISCORD WEBHOOK URL>",
     "sendUpdates" : <true|false>
 }
@@ -57,7 +57,6 @@ Example of subscribing to the Games Bundle:
 - [X] Ability to "unsubscribe" by deleting Webhook registration from system
 - [X] Rework entire system as Serverless App
 - [X] Polish Embed Formatting
-- [ ] Software Scraping
-- [ ] Monthly Scraping
+- [X] Software Scraping
 - [ ] Micro-site to make Webhook registration / deregistration easier
 - [ ] Ability to send out messages about updates to bundles
