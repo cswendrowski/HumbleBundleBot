@@ -1,4 +1,6 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
+using System.Text;
+using System.Web.Security;
 
 namespace HumbleBundleServerless.Models
 {
@@ -9,14 +11,19 @@ namespace HumbleBundleServerless.Models
             PartitionKey = type.ToString();
             RowKey = System.Guid.NewGuid().ToString();
 
-            Webhook = webhook;
+            EncryptedWebhook = MachineKey.Protect(Encoding.UTF8.GetBytes(webhook));
             ShouldRecieveUpdates = shouldRecieveUpdates;
             BundleType = (int) type;
         }
 
         public WebhookRegistrationEntity() { }
 
-        public string Webhook { get; set; }
+        public byte[] EncryptedWebhook { get; set; }
+
+        public string GetDecryptedWebhook()
+        {
+            return Encoding.UTF8.GetString(MachineKey.Unprotect(EncryptedWebhook));
+        }
 
         public bool ShouldRecieveUpdates { get; set; } = false;
 

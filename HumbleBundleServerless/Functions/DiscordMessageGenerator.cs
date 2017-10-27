@@ -76,7 +76,7 @@ namespace HumbleBundleServerless
 
         private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type)
         {
-            return existingWebhooks.Where(x => x.PartitionKey == type.ToString()).Select(x => x.Webhook).ToList();
+            return existingWebhooks.Where(x => x.PartitionKey == type.ToString()).ToList().Select(x => x.GetDecryptedWebhook()).ToList();
         }
     }
 }

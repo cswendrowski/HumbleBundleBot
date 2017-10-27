@@ -43,7 +43,7 @@ namespace HumbleBundleServerless.Functions
                 return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass in a valid Discord Webhook URL in the request body");
             }
 
-            var entity = existingWebhooks.ToList().FirstOrDefault(x => x.BundleType == type && x.Webhook == webhook);
+            var entity = existingWebhooks.ToList().FirstOrDefault(x => x.BundleType == type && x.GetDecryptedWebhook() == webhook);
 
             if (entity == null)
             {
