@@ -29,9 +29,10 @@ namespace HumbleBundleServerless
                 currentBundleNames.Add(fullBundle.Name);
             }
 
-            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper(), BundleTypes.GAMES);
-            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleBookScraper(), BundleTypes.BOOKS);
-            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleMobileScraper(), BundleTypes.MOBILE);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com"), BundleTypes.GAMES);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/books"), BundleTypes.BOOKS);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/mobile"), BundleTypes.MOBILE);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/software"), BundleTypes.SOFTWARE);
         }
 
         private static void ScrapeAndCheckBundles(List<String> currentBundleNames, ICollector<HumbleBundleEntity> bundlesTable, ICollector<BundleQueue> bundleQueue, TraceWriter log, HumbleScraper scraper, BundleTypes type)

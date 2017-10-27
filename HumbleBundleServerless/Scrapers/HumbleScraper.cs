@@ -12,14 +12,16 @@ namespace HumbleBundleBot
 
         private List<HumbleItem> foundGames = new List<HumbleItem>();
 
-        public virtual string GetBaseUrl()
+        public string BaseUrl { get; set; }
+
+        public HumbleScraper(string baseUrl)
         {
-            return "https://www.humblebundle.com";
+            BaseUrl = baseUrl;
         }
 
         public List<HumbleItem> Scrape()
         {
-            ScrapePage(GetBaseUrl());
+            ScrapePage(BaseUrl);
 
             return foundGames;
         }
@@ -34,7 +36,7 @@ namespace HumbleBundleBot
 
             visitedUrls.Add(finalUrl);
 
-            if (finalUrl != GetBaseUrl())
+            if (finalUrl != BaseUrl)
                 ScrapeSections(response, finalUrl);
 
             VisitOtherPages(response);
