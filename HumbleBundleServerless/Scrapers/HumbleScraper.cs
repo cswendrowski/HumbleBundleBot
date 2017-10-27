@@ -30,7 +30,7 @@ namespace HumbleBundleBot
             var document = web.Load(url);
             var response = document.DocumentNode;
 
-            var finalUrl = web.ResponseUri.ToString();
+            var finalUrl = response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:url").Attributes["content"].Value;
 
             visitedUrls.Add(finalUrl);
 
@@ -42,7 +42,7 @@ namespace HumbleBundleBot
 
         private string GetBundleName(HtmlNode response)
         {
-            return response.CssSelect("#active-subtab").First().InnerText.CleanInnerText();
+            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "title").Attributes["content"].Value;
         }
 
         private string GetBundleDescription(HtmlNode response)

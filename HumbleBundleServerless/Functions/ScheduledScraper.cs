@@ -31,6 +31,7 @@ namespace HumbleBundleServerless
 
             ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper(), BundleTypes.GAMES);
             ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleBookScraper(), BundleTypes.BOOKS);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleMobileScraper(), BundleTypes.MOBILE);
         }
 
         private static void ScrapeAndCheckBundles(List<String> currentBundleNames, ICollector<HumbleBundleEntity> bundlesTable, ICollector<BundleQueue> bundleQueue, TraceWriter log, HumbleScraper scraper, BundleTypes type)
