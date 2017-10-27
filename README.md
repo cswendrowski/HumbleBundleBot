@@ -25,13 +25,12 @@ Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/
 
 The following types are valid:
 
-| Type        | Type Code | Implemented? |
-| ----------- | --------- | ------------ |
-| Games       | 0         | YES          |
-| Books       | 1         | YES          |
-| Mobile      | 2         | YES          |
-| Software    | 3         | NO           |
-| Monthly     | 4         | NO           |
+| Type        | Type Code |
+| ----------- | --------- |
+| Games       | 0         |
+| Books       | 1         |
+| Mobile      | 2         |
+| Software    | 3         |
 
 Example of subscribing to the Games Bundle:
 
@@ -43,7 +42,7 @@ Example of subscribing to the Games Bundle:
 }
 ```
 
-**NOTE: `sendUpdates` and Unimplemented Type's can be registered now, but will not function until support is added. No changes should be needed to be made to start recieving messages once these are supported.**
+**NOTE: `sendUpdates` can be registered now, but will not function until support is added. No changes should be needed to be made to start recieving update messages once support is added.**
 
 ## Roadmap
 - [X] Discord Embed Formatting
