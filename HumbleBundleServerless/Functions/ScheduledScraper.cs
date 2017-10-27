@@ -25,34 +25,38 @@ namespace HumbleBundleServerless
             foreach (var bundle in currentBundles)
             {
                 var fullBundle = bundle.GetBundle();
-                log.Info($"Found current bundle {fullBundle.Name}");
+                log.Info($"Found stored bundle {fullBundle.Name}");
                 currentBundleNames.Add(fullBundle.Name);
             }
 
-            var gameScraper = new HumbleScraper();
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleScraper(), BundleTypes.GAMES);
+            ScrapeAndCheckBundles(currentBundleNames, bundlesTable, bundleQueue, log, new HumbleBookScraper(), BundleTypes.BOOKS);
+        }
 
-            var foundGames = gameScraper.Scrape();
+        private static void ScrapeAndCheckBundles(List<String> currentBundleNames, ICollector<HumbleBundleEntity> bundlesTable, ICollector<BundleQueue> bundleQueue, TraceWriter log, HumbleScraper scraper, BundleTypes type)
+        {
+            var foundGames = scraper.Scrape();
 
-            var bundles = GetBundlesFromGames(foundGames);
+            var bundles = GetBundlesFromItems(foundGames);
 
             foreach (var bundle in bundles)
             {
-                log.Info($"Found Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Games.Count)} items");
+                log.Info($"Found current {type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Games.Count)} items");
 
                 if (!currentBundleNames.Any(x => x == bundle.Name))
                 {
                     log.Info($"New bundle, adding to table storage");
-                    bundlesTable.Add(new HumbleBundleEntity(BundleTypes.GAMES, bundle));
+                    bundlesTable.Add(new HumbleBundleEntity(type, bundle));
                     bundleQueue.Add(new BundleQueue()
                     {
-                        Type = BundleTypes.GAMES,
+                        Type = type,
                         Bundle = bundle
                     });
                 }
             }
         }
 
-        private static List<HumbleBundle> GetBundlesFromGames(List<HumbleGame> results)
+        private static List<HumbleBundle> GetBundlesFromItems(List<HumbleItem> results)
         {
             var toReturn = new List<HumbleBundle>();
 

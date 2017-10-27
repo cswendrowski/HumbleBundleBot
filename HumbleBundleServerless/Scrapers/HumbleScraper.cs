@@ -10,14 +10,14 @@ namespace HumbleBundleBot
 
         private List<string> visitedUrls = new List<string>();
 
-        private List<HumbleGame> foundGames = new List<HumbleGame>();
+        private List<HumbleItem> foundGames = new List<HumbleItem>();
 
         public virtual string GetBaseUrl()
         {
             return "https://www.humblebundle.com";
         }
 
-        public List<HumbleGame> Scrape()
+        public List<HumbleItem> Scrape()
         {
             ScrapePage(GetBaseUrl());
 
@@ -95,7 +95,7 @@ namespace HumbleBundleBot
                 var title = gameTitle.InnerText.CleanInnerText();
                 if (!foundGames.Any(x => x.Title == title))
                 {
-                    foundGames.Add(new HumbleGame
+                    foundGames.Add(new HumbleItem
                     {
                         Bundle = bundleName,
                         BundleDescription = bundleDescription,
@@ -112,7 +112,7 @@ namespace HumbleBundleBot
                 var title = section.CssSelect(".fi-content-body").First().InnerText.CleanInnerText();
                 if (!foundGames.Any(x => x.Title == title))
                 {
-                    foundGames.Add(new HumbleGame
+                    foundGames.Add(new HumbleItem
                     {
                         Bundle = bundleName,
                         BundleDescription = bundleDescription,
@@ -139,7 +139,7 @@ namespace HumbleBundleBot
         }  
     }
 
-    public class HumbleGame
+    public class HumbleItem
     {
         public string Bundle { get; set; }
         public string BundleDescription { get; set; }
