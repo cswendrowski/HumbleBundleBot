@@ -7,9 +7,9 @@ Each Bundle can be independently scanned and sent to a different channel, allowi
 
 Scraping is done once and results are sent to all relevant webhooks using Serverless Functions and Azure Queue, making the system extremely cheap to run (currently free) and highly scalable.
 
-![](https://puu.sh/y6xli/fbb05197e7.png)
+![](https://s1.postimg.org/1s276nvq0v/e7179cf5e9.jpg)
 
-![](https://puu.sh/y6wJs/0426467d2a.png)
+![](https://s1.postimg.org/5bo4wgxkxr/fc61e2eb5d.jpg)
 
 ## How To Register a Webhook
 
