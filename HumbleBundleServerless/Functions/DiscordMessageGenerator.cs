@@ -22,13 +22,20 @@ namespace HumbleBundleServerless
 
             var bundle = queuedBundle.Bundle;
 
-            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Type);
+            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Type, queuedBundle.IsUpdate);
 
             log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Type}");
 
+            var content = "New Bundle:";
+
+            if (queuedBundle.IsUpdate)
+            {
+                content = "Bundle Updated:";
+            }
 
             var message = new DiscordWebhookPayload
             {
+                content = content,
                 embeds = new List<DiscordEmbed>()
             };
 
@@ -74,9 +81,16 @@ namespace HumbleBundleServerless
             }
         }
 
-        private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type)
+        private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
         {
-            return existingWebhooks.Where(x => x.PartitionKey == type.ToString()).ToList().Select(x => x.GetDecryptedWebhook()).ToList();
+            var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString());
+
+            if (isUpdate)
+            {
+                webhooksForType = webhooksForType.Where(x => x.ShouldRecieveUpdates == true);
+            }
+
+            return  webhooksForType.ToList().Select(x => x.GetDecryptedWebhook()).ToList();
         }
     }
 }
