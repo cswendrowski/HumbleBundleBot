@@ -44,8 +44,6 @@ Example of subscribing to the Games Bundle:
 
 Webhook URLs are encrypted before they are stored.
 
-**NOTE: `sendUpdates` can be registered now, but will not function until support is added. No changes should be needed to be made to start recieving update messages once support is added.**
-
 ## Roadmap
 - [X] Discord Embed Formatting
 - [X] Discord Webhook for message creation
@@ -60,5 +58,6 @@ Webhook URLs are encrypted before they are stored.
 - [X] Polish Embed Formatting
 - [X] Software Scraping
 - [X] Add data-at-rest encryption to Webhook URL's
+- [X] Ability to send out messages about updates to bundles
 - [ ] Micro-site to make Webhook registration / deregistration easier
-- [ ] Ability to send out messages about updates to bundles
+
