@@ -28,17 +28,17 @@ namespace HumbleBundleServerless
             ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/books"), BundleTypes.BOOKS);
             ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/mobile"), BundleTypes.MOBILE);
             ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/software"), BundleTypes.SOFTWARE);
+
+            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/extralife"), BundleTypes.SPECIAL);
         }
 
         private static void ScrapeAndCheckBundles(List<HumbleBundle> currentBundles, ICollector<HumbleBundleEntity> bundlesTable, CloudTable bundleTableClient, ICollector<BundleQueue> bundleQueue, TraceWriter log, HumbleScraper scraper, BundleTypes type)
         {
-            var foundGames = scraper.Scrape();
-
-            var bundles = GetBundlesFromItems(foundGames);
+            var bundles = scraper.Scrape();
 
             foreach (var bundle in bundles)
             {
-                log.Info($"Found current {type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Games.Count)} items");
+                log.Info($"Found current {type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Items.Count)} items");
 
                 if (!currentBundles.Any(x => x.Name == bundle.Name))
                 {
@@ -52,75 +52,32 @@ namespace HumbleBundleServerless
                 }
                 else
                 {
-                    var updatedGames = new List<HumbleItem>();
-
                     var currentBundle = currentBundles.First(x => x.Name == bundle.Name);
 
                     foreach (var section in bundle.Sections)
                     {
-                        var currentSection = currentBundle.Sections.First(x => x.Title == section.Title);
-
-                        foreach (var game in section.Games)
+                        foreach (var game in section.Items.ToList())
                         {
-                            if (!currentSection.Games.Contains(game))
+                            if (currentBundle.Items.Any(x => x.Name == game.Name))
                             {
-                                updatedGames.Add(new HumbleItem()
-                                {
-                                    Title = game,
-                                    Bundle = bundle.Name,
-                                    BundleDescription = bundle.Description,
-                                    BundleImageUrl = bundle.ImageUrl,
-                                    Section = section.Title,
-                                    URL = bundle.URL
-                                });
+                                section.Items.Remove(game);
                             }
                         }
                     }
 
-                    if (updatedGames.Any())
+                    if (bundle.Items.Any())
                     {
-                        var updatedBundle = GetBundlesFromItems(updatedGames);
-
                         bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(type, bundle)));
 
                         bundleQueue.Add(new BundleQueue()
                         {
                             Type = type,
-                            Bundle = updatedBundle.First(),
+                            Bundle = bundle,
                             IsUpdate = true
                         });
                     }
                 }
             }
-        }
-
-        private static List<HumbleBundle> GetBundlesFromItems(List<HumbleItem> results)
-        {
-            var toReturn = new List<HumbleBundle>();
-
-            foreach (var bundleResult in results.GroupBy(x => x.Bundle))
-            {
-                var bundle = new HumbleBundle
-                {
-                    Name = bundleResult.Key,
-                    URL = bundleResult.First().URL,
-                    Description = bundleResult.First().BundleDescription,
-                    ImageUrl = bundleResult.First().BundleImageUrl
-                };
-
-                foreach (var section in bundleResult.GroupBy(x => x.Section))
-                {
-                    bundle.Sections.Add(new HumbleSection()
-                    {
-                        Title = section.Key,
-                        Games = section.Select(x => x.Title).ToList()
-                    });
-                }
-
-                toReturn.Add(bundle);
-            }
-
-            return toReturn;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using HumbleBundleServerless.Models;
 using ScrapySharp.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace HumbleBundleBot
 
         private List<string> visitedUrls = new List<string>();
 
-        private List<HumbleItem> foundGames = new List<HumbleItem>();
+        private List<HumbleBundle> foundBundles = new List<HumbleBundle>();
 
         public string BaseUrl { get; set; }
 
@@ -19,11 +20,11 @@ namespace HumbleBundleBot
             BaseUrl = baseUrl;
         }
 
-        public List<HumbleItem> Scrape()
+        public List<HumbleBundle> Scrape()
         {
             ScrapePage(BaseUrl);
 
-            return foundGames;
+            return foundBundles;
         }
 
         private void ScrapePage(string url)
@@ -36,8 +37,16 @@ namespace HumbleBundleBot
 
             visitedUrls.Add(finalUrl);
 
-            if (finalUrl != BaseUrl)
-                ScrapeSections(response, finalUrl);
+            var bundle = new HumbleBundle
+            {
+                Name = GetBundleName(response),
+                Description = GetBundleDescription(response),
+                ImageUrl = GetBundleImageUrl(response)
+            };
+
+            ScrapeSections(bundle, response, finalUrl);
+
+            foundBundles.Add(bundle);
 
             VisitOtherPages(response);
         }
@@ -57,23 +66,20 @@ namespace HumbleBundleBot
             return response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:image").Attributes["content"].Value;
         }
 
-        private void ScrapeSections(HtmlNode response, string finalUrl)
+        private void ScrapeSections(HumbleBundle bundle, HtmlNode response, string finalUrl)
         {
-            var bundleName = GetBundleName(response);
-            var bundleDescrption = GetBundleDescription(response);
-            var bundleImageUrl = GetBundleImageUrl(response);
 
-            foreach (var section in response.CssSelect(".dd-game-row"))
+            foreach (var parsedSection in response.CssSelect(".dd-game-row"))
             {
                 var sectionTitle = "";
 
                 try
                 {
-                    sectionTitle = section.CssSelect(".dd-header-headline").First().InnerText.CleanInnerText();
+                    sectionTitle = parsedSection.CssSelect(".dd-header-headline").First().InnerText.CleanInnerText();
                 }
                 catch
                 {
-                    sectionTitle = section.CssSelect(".fi-content-header").First().InnerText.CleanInnerText();
+                    sectionTitle = parsedSection.CssSelect(".fi-content-header").First().InnerText.CleanInnerText();
                 }
 
                 if (sectionTitle.Contains("average"))
@@ -86,42 +92,39 @@ namespace HumbleBundleBot
                     continue;
                 }
 
-                FindGamesInSection(finalUrl, bundleName, bundleDescrption, bundleImageUrl, section, sectionTitle);
+                var sectionToAdd = new HumbleSection()
+                {
+                    Title = sectionTitle
+                };
+
+                FindGamesInSection(finalUrl, parsedSection, sectionToAdd);
+
+                bundle.Sections.Add(sectionToAdd);
             }
         }
 
-        private void FindGamesInSection(string finalUrl, string bundleName, string bundleDescription, string bundleImageUrl, HtmlNode section, string sectionTitle)
+        private void FindGamesInSection(string finalUrl, HtmlNode parsedSection, HumbleSection section)
         {
-            foreach (var gameTitle in section.CssSelect(".dd-image-box-caption"))
+            foreach (var itemTitle in parsedSection.CssSelect(".dd-image-box-caption"))
             {
-                var title = gameTitle.InnerText.CleanInnerText();
-                if (!foundGames.Any(x => x.Title == title))
+                var itemName = itemTitle.InnerText.CleanInnerText();
+                if (!section.Items.Any(x => x.Name == itemName))
                 {
-                    foundGames.Add(new HumbleItem
+                    section.Items.Add(new HumbleItem()
                     {
-                        Bundle = bundleName,
-                        BundleDescription = bundleDescription,
-                        BundleImageUrl = bundleImageUrl,
-                        URL = finalUrl,
-                        Title = title,
-                        Section = sectionTitle
+                        Name = itemName
                     });
                 }
             }
 
-            if (section.CssSelect(".fi-content-body").Any())
+            if (parsedSection.CssSelect(".fi-content-body").Any())
             {
-                var title = section.CssSelect(".fi-content-body").First().InnerText.CleanInnerText();
-                if (!foundGames.Any(x => x.Title == title))
+                var itemName = parsedSection.CssSelect(".fi-content-body").First().InnerText.CleanInnerText();
+                if (!section.Items.Any(x => x.Name == itemName))
                 {
-                    foundGames.Add(new HumbleItem
+                    section.Items.Add(new HumbleItem()
                     {
-                        Bundle = bundleName,
-                        BundleDescription = bundleDescription,
-                        BundleImageUrl = bundleImageUrl,
-                        URL = finalUrl,
-                        Title = title,
-                        Section = sectionTitle
+                        Name = itemName
                     });
                 }
             }
@@ -139,20 +142,5 @@ namespace HumbleBundleBot
                 }
             }
         }  
-    }
-
-    public class HumbleItem
-    {
-        public string Bundle { get; set; }
-        public string BundleDescription { get; set; }
-        public string BundleImageUrl { get; set; }
-        public string URL { get; set; }
-        public string Section { get; set; }
-        public string Title { get; set; }
-
-        public override string ToString()
-        {
-            return "[" + Bundle + "]  [" + Section + "]  " + Title;
-        }
     }
 }

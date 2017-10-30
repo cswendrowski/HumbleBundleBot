@@ -63,7 +63,7 @@ namespace HumbleBundleServerless
                     description = ""
                 };
 
-                foreach (var game in section.Games)
+                foreach (var game in section.Items)
                 {
                     embed.description += game + "\n";
                 }

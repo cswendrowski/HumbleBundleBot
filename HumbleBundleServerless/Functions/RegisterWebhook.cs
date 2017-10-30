@@ -24,7 +24,7 @@ namespace HumbleBundleServerless.Functions
             string webhook = data?.webhook;
             bool recieveUpdates = data?.sendUpdates;
 
-            var lastBundleType = BundleTypes.MONTHLY;
+            var lastBundleType = BundleTypes.SPECIAL;
 
             if (type < 0 || type > (int) lastBundleType)
             {

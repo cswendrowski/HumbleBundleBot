@@ -6,6 +6,6 @@
         BOOKS,
         MOBILE,
         SOFTWARE,
-        MONTHLY
+        SPECIAL
     }
 }
