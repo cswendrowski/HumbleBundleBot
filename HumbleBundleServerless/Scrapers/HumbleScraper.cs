@@ -41,7 +41,8 @@ namespace HumbleBundleBot
             {
                 Name = GetBundleName(response),
                 Description = GetBundleDescription(response),
-                ImageUrl = GetBundleImageUrl(response)
+                ImageUrl = GetBundleImageUrl(response),
+                URL = finalUrl
             };
 
             ScrapeSections(bundle, response, finalUrl);
