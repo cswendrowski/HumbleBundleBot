@@ -31,6 +31,9 @@ The following types are valid:
 | Books       | 1         |
 | Mobile      | 2         |
 | Software    | 3         |
+| Special     | 4         |
+
+The "Special" Type is for bundles that don't fit into the other categories, such as the "Extra Life" bundle which is a mix of both Games and Ebooks.
 
 Example of subscribing to the Games Bundle:
 
@@ -59,5 +62,6 @@ Webhook URLs are encrypted before they are stored.
 - [X] Software Scraping
 - [X] Add data-at-rest encryption to Webhook URL's
 - [X] Ability to send out messages about updates to bundles
+- [X] Extralife "Special" scraping
 - [ ] Micro-site to make Webhook registration / deregistration easier
 
