@@ -31,9 +31,7 @@ The following types are valid:
 | Books       | 1         |
 | Mobile      | 2         |
 | Software    | 3         |
-| Special     | 4         |
-
-The "Special" Type is for bundles that don't fit into the other categories, such as the "Extra Life" bundle which is a mix of both Games and Ebooks.
+| Mixed       | 4         |
 
 Example of subscribing to the Games Bundle:
 
