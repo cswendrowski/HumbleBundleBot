@@ -13,40 +13,29 @@ namespace HumbleBundleServerless
     {
         [FunctionName("ScheduledScraper")]
         public static void Run([TimerTrigger("0 0 */4 * * *")]TimerInfo myTimer,
-            [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentBundles,
+            [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentTableBundles,
             [Table("humbleBundles")] ICollector<HumbleBundleEntity> bundlesTable,
             [Table("humbleBundles")] CloudTable bundleTableClient,
             [Queue("bundlequeue")] ICollector<BundleQueue> bundleQueue,
             [Queue("updatequeue")] ICollector<string> updateQueue,
             TraceWriter log)
         {
-            log.Info($"C# Timer trigger function executed at: {DateTime.Now}");
+            log.Info($"Scraper function executed at: {DateTime.Now}");
 
-            var bundles = currentBundles.ToList().Select(x => x.GetBundle()).ToList();
+            var currentBundles = currentTableBundles.ToList().Select(x => x.GetBundle()).ToList();
 
-            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com"), BundleTypes.GAMES);
-            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/books"), BundleTypes.BOOKS);
-            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/mobile"), BundleTypes.MOBILE);
-            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/software"), BundleTypes.SOFTWARE);
-
-            ScrapeAndCheckBundles(bundles, bundlesTable, bundleTableClient, bundleQueue, log, new HumbleScraper("https://www.humblebundle.com/extralife"), BundleTypes.SPECIAL);
-        }
-
-        private static void ScrapeAndCheckBundles(List<HumbleBundle> currentBundles, ICollector<HumbleBundleEntity> bundlesTable, CloudTable bundleTableClient, ICollector<BundleQueue> bundleQueue, TraceWriter log, HumbleScraper scraper, BundleTypes type)
-        {
-            var bundles = scraper.Scrape();
+            var bundles = new HumbleScraper("https://www.humblebundle.com").Scrape();
 
             foreach (var bundle in bundles)
             {
-                log.Info($"Found current {type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Items.Count)} items");
+                log.Info($"Found current {bundle.Type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Items.Count)} items");
 
                 if (!currentBundles.Any(x => x.Name == bundle.Name))
                 {
                     log.Info($"New bundle, adding to table storage");
-                    bundlesTable.Add(new HumbleBundleEntity(type, bundle));
+                    bundlesTable.Add(new HumbleBundleEntity(bundle));
                     bundleQueue.Add(new BundleQueue()
                     {
-                        Type = type,
                         Bundle = bundle
                     });
                 }
@@ -54,24 +43,24 @@ namespace HumbleBundleServerless
                 {
                     var currentBundle = currentBundles.First(x => x.Name == bundle.Name);
 
-                    foreach (var section in bundle.Sections)
+                    var foundItems = bundle.Sections.SelectMany(x => x.Items).ToList();
+
+
+                    foreach (var item in foundItems.ToList())
                     {
-                        foreach (var game in section.Items.ToList())
+                        if (currentBundle.Items.Any(x => x.Name == item.Name))
                         {
-                            if (currentBundle.Items.Any(x => x.Name == game.Name))
-                            {
-                                section.Items.Remove(game);
-                            }
+                            foundItems.Remove(item);
                         }
                     }
 
-                    if (bundle.Items.Any())
+
+                    if (foundItems.Any())
                     {
-                        bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(type, bundle)));
+                        bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(bundle)));
 
                         bundleQueue.Add(new BundleQueue()
                         {
-                            Type = type,
                             Bundle = bundle,
                             IsUpdate = true
                         });

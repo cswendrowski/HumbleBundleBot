@@ -10,6 +10,7 @@ namespace HumbleBundleServerless.Models
         public String URL { get; set; }
         public String Description { get; set; }
         public String ImageUrl { get; set; }
+        public BundleTypes Type { get; set; }
         public List<HumbleSection> Sections { get; set; } = new List<HumbleSection>();
 
         public List<HumbleItem> Items

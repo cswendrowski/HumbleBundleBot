@@ -8,8 +8,6 @@ namespace HumbleBundleServerless.Models
 {
     public class BundleQueue
     {
-        public BundleTypes Type { get; set; }
-
         public HumbleBundle Bundle { get; set; }
 
         public bool IsUpdate { get; set; } = false;

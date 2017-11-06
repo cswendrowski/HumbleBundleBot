@@ -5,9 +5,9 @@ namespace HumbleBundleServerless.Models
 {
     public class HumbleBundleEntity : TableEntity
     {
-        public HumbleBundleEntity(BundleTypes bundleType, HumbleBundle bundle)
+        public HumbleBundleEntity(HumbleBundle bundle)
         {
-            PartitionKey = bundleType.ToString();
+            PartitionKey = bundle.Type.ToString();
             RowKey = bundle.Name;
 
             Bundle = JsonConvert.SerializeObject(bundle);

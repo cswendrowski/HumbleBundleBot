@@ -22,15 +22,15 @@ namespace HumbleBundleServerless
 
             var bundle = queuedBundle.Bundle;
 
-            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Type, queuedBundle.IsUpdate);
+            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Bundle.Type, queuedBundle.IsUpdate);
 
-            log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Type}");
+            log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Bundle.Type}");
 
-            var content = "New Bundle:";
+            var content = "New Bundle: " + bundle.Name;
 
             if (queuedBundle.IsUpdate)
             {
-                content = "Bundle Updated:";
+                content = "Bundle Updated: " + bundle.Name;
             }
 
             var message = new DiscordWebhookPayload
