@@ -2,6 +2,7 @@
 using HumbleBundleServerless.Models;
 using Newtonsoft.Json;
 using ScrapySharp.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,25 +35,35 @@ namespace HumbleBundleBot
             var document = web.Load(url);
             var response = document.DocumentNode;
 
-            var finalUrl = response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:url").Attributes["content"].Value;
+            var finalUrl = response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:url").Attributes["content"].Value;
 
             var bundlesTab = getBundlesTab(response);
 
             visitedUrls.Add(url);
             visitedUrls.Add(finalUrl);
 
-            var bundle = new HumbleBundle
+            try
             {
-                Name = GetBundleName(response),
-                Description = GetBundleDescription(response),
-                ImageUrl = GetBundleImageUrl(response),
-                URL = finalUrl,
-                Type = GetBundleType(bundlesTab)
-            };
+                if (bundlesTab.Any(x => x.is_active))
+                {
+                    var bundle = new HumbleBundle
+                    {
+                        Name = GetBundleName(response),
+                        Description = GetBundleDescription(response),
+                        ImageUrl = GetBundleImageUrl(response),
+                        URL = finalUrl,
+                        Type = GetBundleType(bundlesTab)
+                    };
 
-            ScrapeSections(bundle, response, finalUrl);
+                    ScrapeSections(bundle, response, finalUrl);
 
-            foundBundles.Add(bundle);
+                    foundBundles.Add(bundle);
+                }
+            }
+            catch (Exception e)
+            {
+                // No active bundle on this page
+            }
 
             VisitOtherPages(bundlesTab);
         }
@@ -68,7 +79,13 @@ namespace HumbleBundleBot
             var endIndex = jsonResponse.IndexOf(";");
             jsonResponse = jsonResponse.Substring(0, endIndex);
 
-            return JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse);
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+
+            return JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
         }
 
         private BundleTypes GetBundleType(List<dynamic> bundlesTab)
@@ -87,17 +104,17 @@ namespace HumbleBundleBot
 
         private string GetBundleName(HtmlNode response)
         {
-            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "title").Attributes["content"].Value;
+            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:title").Attributes["content"].Value;
         }
 
         private string GetBundleDescription(HtmlNode response)
         {
-            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:description").Attributes["content"].Value;
+            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:description").Attributes["content"].Value;
         }
 
         private string GetBundleImageUrl(HtmlNode response)
         {
-            return response.CssSelect("meta").First(x => x.Attributes[0].Value == "og:image").Attributes["content"].Value;
+            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:image").Attributes["content"].Value;
         }
 
         private void ScrapeSections(HumbleBundle bundle, HtmlNode response, string finalUrl)
