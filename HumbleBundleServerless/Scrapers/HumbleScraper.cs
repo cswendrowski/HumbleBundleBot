@@ -97,6 +97,7 @@ namespace HumbleBundleBot
                 case "games": return BundleTypes.GAMES;
                 case "mobile": return BundleTypes.MOBILE;
                 case "books": return BundleTypes.BOOKS;
+                case "comics": return BundleTypes.BOOKS;
                 case "software": return BundleTypes.SOFTWARE;
                 default: return BundleTypes.SPECIAL;
             }
