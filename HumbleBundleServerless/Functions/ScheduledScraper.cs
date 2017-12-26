@@ -30,7 +30,7 @@ namespace HumbleBundleServerless
             {
                 log.Info($"Found current {bundle.Type.ToString()} Bundle {bundle.Name} with {bundle.Sections.Sum(x => x.Items.Count)} items");
 
-                if (!currentBundles.Any(x => x.Name == bundle.Name))
+                if (currentBundles.All(x => x.Name != bundle.Name))
                 {
                     log.Info($"New bundle, adding to table storage");
                     bundlesTable.Add(new HumbleBundleEntity(bundle));

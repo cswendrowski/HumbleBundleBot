@@ -6,6 +6,7 @@ using HumbleBundleServerless.Models;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace HumbleBundleServerless
 {
@@ -18,7 +19,7 @@ namespace HumbleBundleServerless
             [Table("webhookRegistration")] IQueryable<WebhookRegistrationEntity> existingWebhooks,
             TraceWriter log)
         {
-            log.Info($"C# Queue trigger function processed: {queuedBundle.Bundle.Name}");
+            log.Info($"Message generator trigger function processed: {queuedBundle.Bundle.Name}");
 
             var bundle = queuedBundle.Bundle;
 
@@ -63,13 +64,32 @@ namespace HumbleBundleServerless
                     description = ""
                 };
 
-                foreach (var item in section.Items)
+                foreach (var item in section.Items.Take(25))
                 {
                     embed.description += item.Name + "\n";
                 }
 
                 message.embeds.Add(embed);
+
+                if (section.Items.Count > 25)
+                {
+                    var embedContinued = new DiscordEmbed
+                    {
+                        title = section.Title,
+                        url = bundle.URL,
+                        description = ""
+                    };
+
+                    foreach (var item in section.Items.Skip(25).Take(25))
+                    {
+                        embedContinued.description += item.Name + "\n";
+                    }
+
+                    message.embeds.Add(embedContinued);
+                }
             }
+
+            log.Info("Created message " + JsonConvert.SerializeObject(message));
 
             foreach (var webhook in webhooks)
             {
