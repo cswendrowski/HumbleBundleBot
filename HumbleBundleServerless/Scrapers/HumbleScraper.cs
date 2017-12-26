@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using System;
+using HtmlAgilityPack;
 using HumbleBundleServerless.Models;
 using Newtonsoft.Json;
 using ScrapySharp.Extensions;
@@ -11,9 +12,9 @@ namespace HumbleBundleBot
     public class HumbleScraper
     {
 
-        private List<string> visitedUrls = new List<string>();
+        private readonly List<string> _visitedUrls = new List<string>();
 
-        private List<HumbleBundle> foundBundles = new List<HumbleBundle>();
+        private readonly List<HumbleBundle> _foundBundles = new List<HumbleBundle>();
 
         public string BaseUrl { get; set; }
 
@@ -26,7 +27,7 @@ namespace HumbleBundleBot
         {
             ScrapePage(BaseUrl);
 
-            return foundBundles;
+            return _foundBundles;
         }
 
         private void ScrapePage(string url)
@@ -35,48 +36,49 @@ namespace HumbleBundleBot
             var document = web.Load(url);
             var response = document.DocumentNode;
 
-            var finalUrl = response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:url").Attributes["content"].Value;
+            var finalUrl = GetOgPropertyValue(response, "url");
 
-            var bundlesTab = getBundlesTab(response);
+            var bundlesTab = GetBundlesTab(response);
 
-            visitedUrls.Add(url);
-            visitedUrls.Add(finalUrl);
-
+            _visitedUrls.Add(url);
+            _visitedUrls.Add(finalUrl);
             try
             {
-                if (bundlesTab.Any(x => x.is_active))
+                var bundle = new HumbleBundle
                 {
-                    var bundle = new HumbleBundle
-                    {
-                        Name = GetBundleName(response),
-                        Description = GetBundleDescription(response),
-                        ImageUrl = GetBundleImageUrl(response),
-                        URL = finalUrl,
-                        Type = GetBundleType(bundlesTab)
-                    };
+                    Name = GetOgPropertyValue(response, "title"),
+                    Description = GetOgPropertyValue(response, "description"),
+                    ImageUrl = GetOgPropertyValue(response, "image"),
+                    URL = finalUrl,
+                    Type = GetBundleType(bundlesTab)
+                };
 
-                    ScrapeSections(bundle, response, finalUrl);
+                ScrapeSections(bundle, response);
 
-                    foundBundles.Add(bundle);
-                }
+                _foundBundles.Add(bundle);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                // No active bundle on this page
+                // Do nothing
             }
 
             VisitOtherPages(bundlesTab);
+        }
+
+        private static string GetOgPropertyValue(HtmlNode response, string property)
+        {
+            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:" + property).Attributes["content"].Value;
         }
 
         /**
          * The bundles tab is injected via JS after page load. The data it injects is already in-page, however, so we can
          * parse and deseralize it to get the data we want.
          **/
-        private List<dynamic> getBundlesTab(HtmlNode response)
+        private static List<dynamic> GetBundlesTab(HtmlNode response)
         {
-            var startString = "var productTiles = ";
-            var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString) + startString.Length);
-            var endIndex = jsonResponse.IndexOf(";");
+            const string startString = "var productTiles = ";
+            var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString, StringComparison.Ordinal) + startString.Length);
+            var endIndex = jsonResponse.IndexOf(";", StringComparison.Ordinal);
             jsonResponse = jsonResponse.Substring(0, endIndex);
 
             var settings = new JsonSerializerSettings
@@ -88,9 +90,9 @@ namespace HumbleBundleBot
             return JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
         }
 
-        private BundleTypes GetBundleType(List<dynamic> bundlesTab)
+        private static BundleTypes GetBundleType(IEnumerable<dynamic> bundlesTab)
         {
-            var activeBundle = bundlesTab.First(x => x.is_active);
+            var activeBundle = bundlesTab.First(x => (bool) x.is_active);
 
             switch (activeBundle.tile_stamp.Value)
             {
@@ -103,27 +105,12 @@ namespace HumbleBundleBot
             }
         }
 
-        private string GetBundleName(HtmlNode response)
-        {
-            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:title").Attributes["content"].Value;
-        }
-
-        private string GetBundleDescription(HtmlNode response)
-        {
-            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:description").Attributes["content"].Value;
-        }
-
-        private string GetBundleImageUrl(HtmlNode response)
-        {
-            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:image").Attributes["content"].Value;
-        }
-
-        private void ScrapeSections(HumbleBundle bundle, HtmlNode response, string finalUrl)
+        private static void ScrapeSections(HumbleBundle bundle, HtmlNode response)
         {
 
             foreach (var parsedSection in response.CssSelect(".dd-game-row"))
             {
-                var sectionTitle = "";
+                string sectionTitle;
 
                 try
                 {
@@ -149,18 +136,18 @@ namespace HumbleBundleBot
                     Title = sectionTitle
                 };
 
-                FindGamesInSection(finalUrl, parsedSection, sectionToAdd);
+                FindGamesInSection(parsedSection, sectionToAdd);
 
                 bundle.Sections.Add(sectionToAdd);
             }
         }
 
-        private void FindGamesInSection(string finalUrl, HtmlNode parsedSection, HumbleSection section)
+        private static void FindGamesInSection(HtmlNode parsedSection, HumbleSection section)
         {
             foreach (var itemTitle in parsedSection.CssSelect(".dd-image-box-caption"))
             {
                 var itemName = itemTitle.InnerText.CleanInnerText();
-                if (!section.Items.Any(x => x.Name == itemName) && !itemName.StartsWith("More in"))
+                if (section.Items.All(x => x.Name != itemName) && !itemName.StartsWith("More in"))
                 {
                     section.Items.Add(new HumbleItem()
                     {
@@ -172,7 +159,7 @@ namespace HumbleBundleBot
             if (parsedSection.CssSelect(".fi-content-body").Any())
             {
                 var itemName = parsedSection.CssSelect(".fi-content-body").First().InnerText.CleanInnerText();
-                if (!section.Items.Any(x => x.Name == itemName) && !itemName.StartsWith("More in"))
+                if (section.Items.All(x => x.Name != itemName) && !itemName.StartsWith("More in"))
                 {
                     section.Items.Add(new HumbleItem()
                     {
@@ -182,13 +169,13 @@ namespace HumbleBundleBot
             }
         }
 
-        private void VisitOtherPages(List<dynamic> bundlesTab)
+        private void VisitOtherPages(IEnumerable<dynamic> bundlesTab)
         {
             foreach (var tab in bundlesTab)
             {
                 var nextPage = "https://www.humblebundle.com/" + tab.url;
 
-                if (!visitedUrls.Contains(nextPage))
+                if (!_visitedUrls.Contains(nextPage))
                 {
                     ScrapePage(nextPage);
                 }
