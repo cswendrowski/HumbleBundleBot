@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using ScrapySharp.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace HumbleBundleBot
@@ -17,6 +18,8 @@ namespace HumbleBundleBot
         private readonly List<HumbleBundle> _foundBundles = new List<HumbleBundle>();
 
         public string BaseUrl { get; set; }
+
+        private const string HumbleBundleUrl = "https://www.humblebundle.com/";
 
         public HumbleScraper(string baseUrl)
         {
@@ -42,27 +45,35 @@ namespace HumbleBundleBot
 
             _visitedUrls.Add(url);
             _visitedUrls.Add(finalUrl);
-            try
+
+            if (url == BaseUrl)
             {
-                var bundle = new HumbleBundle
+                VisitOtherPages(bundlesTab);
+            }
+            else
+            {
+                try
                 {
-                    Name = GetOgPropertyValue(response, "title"),
-                    Description = GetOgPropertyValue(response, "description"),
-                    ImageUrl = GetOgPropertyValue(response, "image"),
-                    URL = finalUrl,
-                    Type = GetBundleType(bundlesTab)
-                };
+                    var bundle = new HumbleBundle
+                    {
+                        Name = GetOgPropertyValue(response, "title"),
+                        Description = GetOgPropertyValue(response, "description"),
+                        ImageUrl = GetOgPropertyValue(response, "image"),
+                        URL = finalUrl,
+                        Type = GetBundleType(bundlesTab)
+                    };
 
-                ScrapeSections(bundle, response);
+                    ScrapeSections(bundle, response);
 
-                _foundBundles.Add(bundle);
+                    _foundBundles.Add(bundle);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                    // Do nothing
+                }
             }
-            catch (Exception)
-            {
-                // Do nothing
-            }
-
-            VisitOtherPages(bundlesTab);
+            
         }
 
         private static string GetOgPropertyValue(HtmlNode response, string property)
@@ -81,6 +92,8 @@ namespace HumbleBundleBot
             var endIndex = jsonResponse.IndexOf(";", StringComparison.Ordinal);
             jsonResponse = jsonResponse.Substring(0, endIndex);
 
+            jsonResponse = jsonResponse.Replace("True", "true").Replace("False", "false");
+
             var settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
@@ -92,16 +105,23 @@ namespace HumbleBundleBot
 
         private static BundleTypes GetBundleType(IEnumerable<dynamic> bundlesTab)
         {
-            var activeBundle = bundlesTab.First(x => (bool) x.is_active);
-
-            switch (activeBundle.tile_stamp.Value)
+            try
             {
-                case "games": return BundleTypes.GAMES;
-                case "mobile": return BundleTypes.MOBILE;
-                case "books": return BundleTypes.BOOKS;
-                case "comics": return BundleTypes.BOOKS;
-                case "software": return BundleTypes.SOFTWARE;
-                default: return BundleTypes.SPECIAL;
+                var activeBundle = bundlesTab.First(x => (bool) x.is_active);
+
+                switch (activeBundle.tile_stamp.Value)
+                {
+                    case "games": return BundleTypes.GAMES;
+                    case "mobile": return BundleTypes.MOBILE;
+                    case "books": return BundleTypes.BOOKS;
+                    case "comics": return BundleTypes.BOOKS;
+                    case "software": return BundleTypes.SOFTWARE;
+                    default: return BundleTypes.SPECIAL;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not determine active bundle type due to: " + e.Message);
             }
         }
 
@@ -114,11 +134,19 @@ namespace HumbleBundleBot
 
                 try
                 {
-                    sectionTitle = parsedSection.CssSelect(".dd-header-headline").First().InnerText.CleanInnerText();
+                    try
+                    {
+                        sectionTitle = parsedSection.CssSelect(".dd-header-headline").First().InnerText
+                            .CleanInnerText();
+                    }
+                    catch
+                    {
+                        sectionTitle = parsedSection.CssSelect(".fi-content-header").First().InnerText.CleanInnerText();
+                    }
                 }
-                catch
+                catch (Exception)
                 {
-                    sectionTitle = parsedSection.CssSelect(".fi-content-header").First().InnerText.CleanInnerText();
+                    sectionTitle = string.Empty;
                 }
 
                 if (sectionTitle.Contains("average"))
@@ -173,7 +201,7 @@ namespace HumbleBundleBot
         {
             foreach (var tab in bundlesTab)
             {
-                var nextPage = "https://www.humblebundle.com/" + tab.url;
+                var nextPage = HumbleBundleUrl + tab.url;
 
                 if (!_visitedUrls.Contains(nextPage))
                 {
