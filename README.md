@@ -45,6 +45,17 @@ Example of subscribing to the Games Bundle:
 
 Webhook URLs are encrypted before they are stored.
 
+## How to remove a registered Webhook
+
+Make a HTTP DELETE request to https://humblebundlenotifications.azurewebsites.net/api/DeleteWebhook with a Body of the following format:
+
+```
+{
+    "type" : <Valid Type Code>,
+    "webhook" : "<YOUR SUBSCRIBED DISCORD WEBHOOK URL>"
+}
+```
+
 ## Roadmap
 - [X] Discord Embed Formatting
 - [X] Discord Webhook for message creation
