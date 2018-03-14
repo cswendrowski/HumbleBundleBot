@@ -89,8 +89,8 @@ namespace HumbleBundleBot
         {
             const string startString = "var productTiles = ";
             var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString, StringComparison.Ordinal) + startString.Length);
-            var endIndex = jsonResponse.IndexOf(";", StringComparison.Ordinal);
-            jsonResponse = jsonResponse.Substring(0, endIndex);
+            var endIndex = jsonResponse.IndexOf("}];", StringComparison.Ordinal);
+            jsonResponse = jsonResponse.Substring(0, endIndex + 2);
 
             jsonResponse = jsonResponse.Replace("True", "true").Replace("False", "false");
 
