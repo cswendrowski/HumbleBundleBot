@@ -6,7 +6,7 @@ namespace HumbleBundleServerless.Models
 {
     public class WebhookRegistrationEntity : TableEntity
     {
-        public WebhookRegistrationEntity(BundleTypes type, string webhook, bool shouldRecieveUpdates)
+        public WebhookRegistrationEntity(BundleTypes type, string webhook, bool shouldRecieveUpdates, WebhookType webhookType)
         {
             PartitionKey = type.ToString();
             RowKey = System.Guid.NewGuid().ToString();
@@ -14,6 +14,7 @@ namespace HumbleBundleServerless.Models
             EncryptedWebhook = MachineKey.Protect(Encoding.UTF8.GetBytes(webhook));
             ShouldRecieveUpdates = shouldRecieveUpdates;
             BundleType = (int) type;
+            WebhookType = (int) webhookType;
         }
 
         public WebhookRegistrationEntity() { }
@@ -28,5 +29,7 @@ namespace HumbleBundleServerless.Models
         public bool ShouldRecieveUpdates { get; set; } = false;
 
         public int BundleType { get; set;  }
+
+        public int WebhookType { get; set; } = (int) Models.WebhookType.Discord;
     }
 }

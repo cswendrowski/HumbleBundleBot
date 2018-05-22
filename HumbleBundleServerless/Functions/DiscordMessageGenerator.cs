@@ -103,14 +103,14 @@ namespace HumbleBundleServerless
 
         private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
         {
-            var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString());
+            var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString() && x.WebhookType == (int) WebhookType.Discord);
 
             if (isUpdate)
             {
-                webhooksForType = webhooksForType.Where(x => x.ShouldRecieveUpdates == true);
+                webhooksForType = webhooksForType.Where(x => x.ShouldRecieveUpdates);
             }
 
-            return  webhooksForType.ToList().Select(x => x.GetDecryptedWebhook()).ToList();
+            return webhooksForType.ToList().Select(x => x.GetDecryptedWebhook()).ToList();
         }
     }
 }

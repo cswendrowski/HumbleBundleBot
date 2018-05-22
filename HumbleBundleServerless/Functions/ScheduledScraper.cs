@@ -17,6 +17,7 @@ namespace HumbleBundleServerless
             [Table("humbleBundles")] ICollector<HumbleBundleEntity> bundlesTable,
             [Table("humbleBundles")] CloudTable bundleTableClient,
             [Queue("bundlequeue")] ICollector<BundleQueue> bundleQueue,
+            [Queue("jsonbundlequeue")] ICollector<BundleQueue> jsonMessageQueue,
             [Queue("updatequeue")] ICollector<string> updateQueue,
             TraceWriter log)
         {
@@ -34,10 +35,8 @@ namespace HumbleBundleServerless
                 {
                     log.Info($"New bundle, adding to table storage");
                     bundlesTable.Add(new HumbleBundleEntity(bundle));
-                    bundleQueue.Add(new BundleQueue()
-                    {
-                        Bundle = bundle
-                    });
+
+                    AddToQueues(bundleQueue, jsonMessageQueue, bundle);
                 }
                 else
                 {
@@ -59,14 +58,25 @@ namespace HumbleBundleServerless
                     {
                         bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(bundle)));
 
-                        bundleQueue.Add(new BundleQueue()
-                        {
-                            Bundle = bundle,
-                            IsUpdate = true
-                        });
+                        AddToQueues(bundleQueue, jsonMessageQueue, bundle);
                     }
                 }
             }
+        }
+
+        private static void AddToQueues(ICollector<BundleQueue> bundleQueue, ICollector<BundleQueue> jsonMessageQueue, HumbleBundle bundle)
+        {
+            bundleQueue.Add(new BundleQueue()
+            {
+                Bundle = bundle,
+                IsUpdate = true
+            });
+
+            jsonMessageQueue.Add(new BundleQueue()
+            {
+                Bundle = bundle,
+                IsUpdate = true
+            });
         }
     }
 }

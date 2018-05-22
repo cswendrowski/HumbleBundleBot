@@ -22,22 +22,23 @@ namespace HumbleBundleServerless.Functions
             try
             {
                 dynamic data = await req.Content.ReadAsAsync<object>();
-                int type = data?.type;
+                int bundleTypeValue = data?.type;
                 string webhook = data?.webhook;
-                bool recieveUpdates = data?.sendUpdates;
+                bool receiveUpdates = data?.sendUpdates;
+                WebhookType webhookTypeValue = data?.webhookType;
 
-                log.Info($"Recieved webhook registration for type {type}. RecieveUpdates? {recieveUpdates}");
+                log.Info($"Recieved webhook registration for type {bundleTypeValue}. RecieveUpdates? {receiveUpdates}");
 
                 var lastBundleType = BundleTypes.SPECIAL;
 
-                if (type < 0 || type > (int) lastBundleType)
+                if (bundleTypeValue < 0 || bundleTypeValue > (int) lastBundleType)
                 {
                     log.Error("Invalid type passed in");
                     return req.CreateResponse(HttpStatusCode.BadRequest,
                         "Please pass in a valid Bundle Type int (0 - " + (int) lastBundleType + ")");
                 }
 
-                var bundleType = (BundleTypes) type;
+                var bundleType = (BundleTypes) bundleTypeValue;
 
                 if (webhook == null)
                 {
@@ -45,21 +46,26 @@ namespace HumbleBundleServerless.Functions
                     return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a webhook in the request body");
                 }
 
-                if (!webhook.Contains("discordapp.com/api/webhooks/"))
+                var webhookType = (WebhookType) webhookTypeValue;
+
+                if (webhookType == WebhookType.Discord)
                 {
-                    log.Error("Invalid webhook provided");
-                    return req.CreateResponse(HttpStatusCode.BadRequest,
-                        "Please pass in a valid Discord Webhook URL in the request body");
+                    if (!webhook.Contains("discordapp.com/api/webhooks/"))
+                    {
+                        log.Error("Invalid webhook provided");
+                        return req.CreateResponse(HttpStatusCode.BadRequest,
+                            "Please pass in a valid Discord Webhook URL in the request body");
+                    }
                 }
 
-                if (inTable.ToList().Any(x => x.GetDecryptedWebhook() == webhook && x.BundleType == type))
+                if (inTable.ToList().Any(x => x.GetDecryptedWebhook() == webhook && x.BundleType == bundleTypeValue))
                 {
                     log.Error("Webhook already registered");
                     return req.CreateResponse(HttpStatusCode.Conflict,
                         "This webhook URL is already registered for this Bundle type");
                 }
 
-                outTable.Add(new WebhookRegistrationEntity(bundleType, webhook, recieveUpdates));
+                outTable.Add(new WebhookRegistrationEntity(bundleType, webhook, receiveUpdates, webhookType));
 
                 return req.CreateResponse(HttpStatusCode.Created);
             }

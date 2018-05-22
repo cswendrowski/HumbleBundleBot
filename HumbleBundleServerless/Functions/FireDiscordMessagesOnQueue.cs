@@ -6,10 +6,10 @@ using RestSharp;
 
 namespace HumbleBundleServerless
 {
-    public static class FireMessagesOnQueue
+    public static class FireDiscordMessagesOnQueue
     {
-        [FunctionName("FireMessagesOnQueue")]
-        public static void Run([QueueTrigger("messagequeue")]DiscordMessage message, TraceWriter log)
+        [FunctionName("FireDiscordMessagesOnQueue")]
+        public static void Run([QueueTrigger("discordmessagequeue")]DiscordMessage message, TraceWriter log)
         {
             log.Info($"C# Queue trigger function processed. Firing message to {message.WebhookUrl} : {message.Payload.content}");
 
