@@ -15,7 +15,7 @@ namespace HumbleBundleServerless
         [FunctionName("DiscordMessageGenerator")]
         public static void Run(
             [QueueTrigger("bundlequeue")] BundleQueue queuedBundle,
-            [Queue("messagequeue")] ICollector<DiscordMessage> messageQueue,
+            [Queue("discordmessagequeue")] ICollector<DiscordMessage> messageQueue,
             [Table("webhookRegistration")] IQueryable<WebhookRegistrationEntity> existingWebhooks,
             TraceWriter log)
         {
