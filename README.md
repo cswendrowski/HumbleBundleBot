@@ -77,6 +77,8 @@ If you register a webhook of type `RawJson` (1), you will receive a `BundleQueue
 
 ## How To Register a Webhook
 
+*All requests to the endpoints require a header of `Content-Type: application/json`*
+
 Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/api/RegisterWebhook with a Body of the following format:
 
 ```
@@ -120,6 +122,8 @@ Example of subscribing to the Games Bundle with a `Discord` webhook:
 Webhook URLs are encrypted before they are stored.
 
 ## How to remove a registered Webhook
+
+*All requests to the endpoints require a header of `Content-Type: application/json`*
 
 Make a HTTP DELETE request to https://humblebundlenotifications.azurewebsites.net/api/DeleteWebhook with a Body of the following format:
 
