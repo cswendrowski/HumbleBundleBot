@@ -1,6 +1,6 @@
 # HumbleBundleBot
 
-![](http://shields.hust.cc/BUILT%20ON-Azure%20Functions-blue.svg)
+![](https://img.shields.io/badge/Built%20On-Azure%20Functions-blue.svg)
 
 Scrapes HumbleBundle.com for new Bundles and posts new bundles to different webhooks whenever a new Bundle shows up.
 Each Bundle can be sent to a different webhook, allowing easy organization of messages - in Discord, each channel can have webhooks associated with them for integrations like this.
