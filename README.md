@@ -7,9 +7,9 @@ Each Bundle can be sent to a different webhook, allowing easy organization of me
 
 Scraping is done once and results are sent to all relevant webhooks using Serverless Functions and Azure Queue, making the system extremely cheap to run (currently free) and highly scalable.
 
-![](https://s1.postimg.org/5bo4wgxkxr/fc61e2eb5d.jpg)
+![](https://s33.postimg.cc/3w0ux45wv/Capture.png)
 
-![](https://s1.postimg.org/1s276nvq0v/e7179cf5e9.jpg)
+![](https://s33.postimg.cc/z4e17ukxb/Capture.png)
 
 ## Changelog
 
