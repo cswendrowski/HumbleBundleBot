@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using HumbleBundleServerless.Models;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace HumbleBundleServerless.Functions
 {
@@ -21,6 +22,8 @@ namespace HumbleBundleServerless.Functions
         {
             try
             {
+                req.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
                 dynamic data = await req.Content.ReadAsAsync<object>();
                 int bundleTypeValue = data?.type;
                 string webhook = data?.webhook;
