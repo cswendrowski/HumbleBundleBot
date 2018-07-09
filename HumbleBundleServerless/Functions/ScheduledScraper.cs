@@ -18,7 +18,6 @@ namespace HumbleBundleServerless
             [Table("humbleBundles")] CloudTable bundleTableClient,
             [Queue("bundlequeue")] ICollector<BundleQueue> bundleQueue,
             [Queue("jsonbundlequeue")] ICollector<BundleQueue> jsonMessageQueue,
-            [Queue("updatequeue")] ICollector<string> updateQueue,
             TraceWriter log)
         {
             log.Info($"Scraper function executed at: {DateTime.Now}");

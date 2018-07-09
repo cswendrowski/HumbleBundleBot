@@ -21,6 +21,8 @@ namespace HumbleBundleBot
 
         private const string HumbleBundleUrl = "https://www.humblebundle.com/";
 
+        private List<dynamic> BundlesTab = new List<dynamic>();
+
         public HumbleScraper(string baseUrl)
         {
             BaseUrl = baseUrl;
@@ -41,14 +43,17 @@ namespace HumbleBundleBot
 
             var finalUrl = GetOgPropertyValue(response, "url");
 
-            var bundlesTab = GetBundlesTab(response);
+            if (!BundlesTab.Any())
+            {
+                BundlesTab = GetBundlesTab(response).ToList();
+            }
 
             _visitedUrls.Add(url);
             _visitedUrls.Add(finalUrl);
 
             if (url == BaseUrl)
             {
-                VisitOtherPages(bundlesTab);
+                VisitOtherPages(BundlesTab);
             }
             else
             {
@@ -60,7 +65,7 @@ namespace HumbleBundleBot
                         Description = GetOgPropertyValue(response, "description"),
                         ImageUrl = GetOgPropertyValue(response, "image"),
                         URL = finalUrl,
-                        Type = GetBundleType(bundlesTab)
+                        Type = GetBundleType(url)
                     };
 
                     ScrapeSections(bundle, response);
@@ -83,14 +88,17 @@ namespace HumbleBundleBot
 
         /**
          * The bundles tab is injected via JS after page load. The data it injects is already in-page, however, so we can
-         * parse and deseralize it to get the data we want.
+         * parse and deserialize it to get the data we want.
          **/
-        private static List<dynamic> GetBundlesTab(HtmlNode response)
+        private static IEnumerable<dynamic> GetBundlesTab(HtmlNode response)
         {
-            const string startString = "var productTiles = ";
+            const string startString = "\"mosaic\":";
+            const string endString = "\"user\": {}";
+
             var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString, StringComparison.Ordinal) + startString.Length);
-            var endIndex = jsonResponse.IndexOf("}];", StringComparison.Ordinal);
-            jsonResponse = jsonResponse.Substring(0, endIndex + 2);
+
+            var endIndex = jsonResponse.IndexOf(endString, StringComparison.Ordinal);
+            jsonResponse = jsonResponse.Substring(0, endIndex - "\r\n      ".Length);
 
             jsonResponse = jsonResponse.Replace("True", "true").Replace("False", "false");
 
@@ -100,29 +108,30 @@ namespace HumbleBundleBot
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
 
-            return JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
+            var converted = JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
+
+            return converted[0]["products"];
         }
 
-        private static BundleTypes GetBundleType(IEnumerable<dynamic> bundlesTab)
+        private static BundleTypes GetBundleType(string url)
         {
-            try
+            if (url.Contains("games") || url.Contains("monthly"))
             {
-                var activeBundle = bundlesTab.First(x => (bool) x.is_active);
-
-                switch (activeBundle.tile_stamp.Value)
-                {
-                    case "games": return BundleTypes.GAMES;
-                    case "mobile": return BundleTypes.MOBILE;
-                    case "books": return BundleTypes.BOOKS;
-                    case "comics": return BundleTypes.BOOKS;
-                    case "software": return BundleTypes.SOFTWARE;
-                    default: return BundleTypes.SPECIAL;
-                }
+                return BundleTypes.GAMES;
             }
-            catch (Exception e)
+            if (url.Contains("mobile"))
             {
-                throw new Exception("Could not determine active bundle type due to: " + e.Message);
+                return BundleTypes.MOBILE;
             }
+            if (url.Contains("books"))
+            {
+                return BundleTypes.BOOKS;
+            }
+            if (url.Contains("software"))
+            {
+                return BundleTypes.SOFTWARE;
+            }
+            return BundleTypes.SPECIAL;
         }
 
         private static void ScrapeSections(HumbleBundle bundle, HtmlNode response)
@@ -201,9 +210,9 @@ namespace HumbleBundleBot
         {
             foreach (var tab in bundlesTab)
             {
-                var nextPage = HumbleBundleUrl + tab.url;
+                string nextPage = HumbleBundleUrl.Replace(".com/", ".com") + tab.product_url;
 
-                if (!_visitedUrls.Contains(nextPage))
+                if (!_visitedUrls.Contains(nextPage) && !nextPage.Contains("store"))
                 {
                     ScrapePage(nextPage);
                 }
