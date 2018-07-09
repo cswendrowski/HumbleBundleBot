@@ -14,7 +14,7 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 ## Changelog
 
 `5/23/2018` - We now support the ability to register any webhook instead of just Discord webhooks.
-If you register a Discord webhook the experience is still the same and you will recieve Discord formatted messages.
+If you register a Discord webhook the experience is still the same and you will receive Discord formatted messages.
 If you have already registered a webhook before this date, your webhook registration has been defaulted to Discord.
 
 If you register a webhook of type `RawJson` (1), you will receive a `BundleQueue` payload that looks similiar to the following:
