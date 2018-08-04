@@ -129,8 +129,9 @@ Make a HTTP DELETE request to https://humblebundlenotifications.azurewebsites.ne
 
 ```
 {
-    "type" : <Valid Bundle Type Code>,
-    "webhook" : "<YOUR SUBSCRIBED WEBHOOK URL>"
+    "type": <Valid Bundle Type Code>,
+    "webhook": "<YOUR SUBSCRIBED WEBHOOK URL>",
+    "webhookType": 0
 }
 ```
 
