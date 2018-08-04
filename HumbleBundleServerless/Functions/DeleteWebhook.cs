@@ -23,6 +23,7 @@ namespace HumbleBundleServerless.Functions
             dynamic data = await req.Content.ReadAsAsync<object>();
             int type = data?.type;
             string webhook = data?.webhook;
+            WebhookType webhookTypeValue = data?.webhookType;
 
             var lastBundleType = BundleTypes.SPECIAL;
 
@@ -38,9 +39,13 @@ namespace HumbleBundleServerless.Functions
                 return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a webhook in the request body");
             }
 
-            if (!webhook.Contains("discordapp.com/api/webhooks/"))
+            if (webhookTypeValue == WebhookType.Discord)
             {
-                return req.CreateResponse(HttpStatusCode.BadRequest, "Please pass in a valid Discord Webhook URL in the request body");
+                if (!webhook.Contains("discordapp.com/api/webhooks/"))
+                {
+                    return req.CreateResponse(HttpStatusCode.BadRequest,
+                        "Please pass in a valid Discord Webhook URL in the request body");
+                }
             }
 
             var entity = existingWebhooks.ToList().FirstOrDefault(x => x.BundleType == type && x.GetDecryptedWebhook() == webhook);
