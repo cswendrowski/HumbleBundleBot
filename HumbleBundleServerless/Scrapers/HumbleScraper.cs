@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.ServiceModel.Syndication;
+using System.Xml;
 
 namespace HumbleBundleBot
 {
@@ -22,6 +24,7 @@ namespace HumbleBundleBot
         private const string HumbleBundleUrl = "https://www.humblebundle.com/";
 
         private List<dynamic> BundlesTab = new List<dynamic>();
+        private List<string> BundleUrls = new List<string>();
 
         public HumbleScraper(string baseUrl)
         {
@@ -43,9 +46,14 @@ namespace HumbleBundleBot
 
             var finalUrl = GetOgPropertyValue(response, "url");
 
-            if (!BundlesTab.Any())
+            //if (!BundlesTab.Any())
+            //{
+            //    BundlesTab = GetBundlesTab(response).ToList();
+            //}
+
+            if (!BundleUrls.Any())
             {
-                BundlesTab = GetBundlesTab(response).ToList();
+                BundleUrls = GetBundleUrlsFromRss().ToList();
             }
 
             _visitedUrls.Add(url);
@@ -53,7 +61,8 @@ namespace HumbleBundleBot
 
             if (url == BaseUrl)
             {
-                VisitOtherPages(BundlesTab);
+                //VisitOtherPages(BundlesTab);
+                VisitOtherPages(BundleUrls);
             }
             else
             {
@@ -111,6 +120,29 @@ namespace HumbleBundleBot
             var converted = JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
 
             return converted[0]["products"];
+        }
+
+        private static IEnumerable<string> GetBundleUrlsFromRss()
+        {
+            var reader = XmlReader.Create("http://blog.humblebundle.com/rss");
+            var feed = SyndicationFeed.Load(reader);
+            reader.Close();
+
+            var lookbackTime = DateTime.UtcNow.AddDays(-21);
+
+            foreach (var item in feed.Items.Where(x => x.PublishDate >= lookbackTime))
+            {
+                var summary = item.Summary.Text;
+
+                if (summary.Contains("https://www.humblebundle.com/store"))
+                {
+                    continue;
+                }
+
+                var start = summary.IndexOf("https://www.humblebundle.com");
+                var end = summary.IndexOf("?utm_source");
+                yield return summary.Substring(start, end - start);
+            }
         }
 
         private static BundleTypes GetBundleType(string url)
@@ -206,17 +238,28 @@ namespace HumbleBundleBot
             }
         }
 
-        private void VisitOtherPages(IEnumerable<dynamic> bundlesTab)
-        {
-            foreach (var tab in bundlesTab)
-            {
-                string nextPage = HumbleBundleUrl.Replace(".com/", ".com") + tab.product_url;
+        //private void VisitOtherPages(IEnumerable<dynamic> bundlesTab)
+        //{
+        //    foreach (var tab in bundlesTab)
+        //    {
+        //        string nextPage = HumbleBundleUrl.Replace(".com/", ".com") + tab.product_url;
 
-                if (!_visitedUrls.Contains(nextPage) && !nextPage.Contains("store"))
+        //        if (!_visitedUrls.Contains(nextPage) && !nextPage.Contains("store"))
+        //        {
+        //            ScrapePage(nextPage);
+        //        }
+        //    }
+        //}  
+
+        private void VisitOtherPages(IEnumerable<string> bundleUrls)
+        {
+            foreach (var url in bundleUrls)
+            {
+                if (!_visitedUrls.Contains(url) && !url.Contains("store"))
                 {
-                    ScrapePage(nextPage);
+                    ScrapePage(url);
                 }
             }
-        }  
+        }
     }
 }

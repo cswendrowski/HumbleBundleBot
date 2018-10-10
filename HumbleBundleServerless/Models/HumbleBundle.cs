@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace HumbleBundleServerless.Models
 {
+    [DebuggerDisplay("{Name}")]
     public class HumbleBundle
     {
         public String Name { get; set; }
