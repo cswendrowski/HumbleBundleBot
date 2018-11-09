@@ -33,9 +33,16 @@ namespace HumbleBundleServerless
                 if (currentBundles.All(x => x.Name != bundle.Name))
                 {
                     log.Info($"New bundle, adding to table storage");
-                    bundlesTable.Add(new HumbleBundleEntity(bundle));
+                    try
+                    {
+                        bundlesTable.Add(new HumbleBundleEntity(bundle));
 
-                    AddToQueues(bundleQueue, jsonMessageQueue, bundle);
+                        AddToQueues(bundleQueue, jsonMessageQueue, bundle);
+                    }
+                    catch (Exception e)
+                    {
+                        log.Error($"Could not add new bundle {bundle.Name} to storage", e);
+                    }
                 }
                 else
                 {
@@ -55,9 +62,16 @@ namespace HumbleBundleServerless
 
                     if (foundItems.Any())
                     {
-                        bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(bundle)));
+                        try
+                        {
+                            bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(bundle)));
 
-                        AddToQueues(bundleQueue, jsonMessageQueue, bundle);
+                            AddToQueues(bundleQueue, jsonMessageQueue, bundle);
+                        }
+                        catch (Exception e)
+                        {
+                            log.Error($"Could not update bundle {bundle.Name}", e);
+                        }
                     }
                 }
             }

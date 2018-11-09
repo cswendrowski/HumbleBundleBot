@@ -6,6 +6,7 @@
         BOOKS,
         MOBILE,
         SOFTWARE,
-        SPECIAL
+        SPECIAL,
+        DEVELOPER_MESSAGES
     }
 }
