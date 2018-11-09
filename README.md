@@ -12,6 +12,7 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 ![](https://s33.postimg.cc/z4e17ukxb/Capture.png)
 
 ## Changelog
+`11/8/2018` - You can now opt-in to Developer Messages - we will only send these out in case of major outages to indicate when the Bot is down for maintenance and when it is back up. This message type is currently only valid for Discord webhooks.
 
 `5/23/2018` - We now support the ability to register any webhook instead of just Discord webhooks.
 If you register a Discord webhook the experience is still the same and you will receive Discord formatted messages.
@@ -99,7 +100,7 @@ The following Bundle types are valid:
 | Mobile      | 2         |
 | Software    | 3         |
 | Mixed       | 4         |
-
+| Developer Messages (Valid for Discord only)| 5  |
 
 The following Webhook types are valid:
 
