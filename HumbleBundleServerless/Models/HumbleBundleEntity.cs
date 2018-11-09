@@ -8,7 +8,7 @@ namespace HumbleBundleServerless.Models
         public HumbleBundleEntity(HumbleBundle bundle)
         {
             PartitionKey = bundle.Type.ToString();
-            RowKey = bundle.Name;
+            RowKey = bundle.Name.Replace("#", "");
 
             Bundle = JsonConvert.SerializeObject(bundle);
         }
