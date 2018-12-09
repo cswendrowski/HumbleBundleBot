@@ -12,7 +12,12 @@ namespace HumbleBundleServerless
     public static class ScheduledScraper
     {
         [FunctionName("ScheduledScraper")]
-        public static void Run([TimerTrigger("0 0 */4 * * *")]TimerInfo myTimer,
+        public static void Run(
+#if DEBUG
+            [TimerTrigger("*/15 * * * * *")]TimerInfo myTimer,
+#else
+            [TimerTrigger("0 0 */4 * * *")]TimerInfo myTimer,
+#endif
             [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentTableBundles,
             [Table("humbleBundles")] ICollector<HumbleBundleEntity> bundlesTable,
             [Table("humbleBundles")] CloudTable bundleTableClient,

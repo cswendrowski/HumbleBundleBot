@@ -75,7 +75,7 @@ namespace HumbleBundleServerless
                 {
                     var embedContinued = new DiscordEmbed
                     {
-                        title = section.Title,
+                        title = section.Title + " (Continued)",
                         url = bundle.URL,
                         description = ""
                     };
