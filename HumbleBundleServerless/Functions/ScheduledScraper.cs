@@ -66,7 +66,7 @@ namespace HumbleBundleServerless
                         {
                             bundleTableClient.Execute(TableOperation.InsertOrReplace(new HumbleBundleEntity(bundle)));
 
-                            AddToQueues(bundleQueue, jsonMessageQueue, bundle);
+                            AddToQueues(bundleQueue, jsonMessageQueue, bundle, foundItems);
                         }
                         catch (Exception e)
                         {
@@ -77,18 +77,25 @@ namespace HumbleBundleServerless
             }
         }
 
-        private static void AddToQueues(ICollector<BundleQueue> bundleQueue, ICollector<BundleQueue> jsonMessageQueue, HumbleBundle bundle)
+        private static void AddToQueues(ICollector<BundleQueue> bundleQueue, ICollector<BundleQueue> jsonMessageQueue, HumbleBundle bundle, List<HumbleItem> updatedItems = null)
         {
+            if (updatedItems == null)
+            {
+                updatedItems = new List<HumbleItem>();
+            }
+
             bundleQueue.Add(new BundleQueue()
             {
                 Bundle = bundle,
-                IsUpdate = true
+                IsUpdate = updatedItems.Any(),
+                UpdatedItems = updatedItems
             });
 
             jsonMessageQueue.Add(new BundleQueue()
             {
                 Bundle = bundle,
-                IsUpdate = true
+                IsUpdate = updatedItems.Any(),
+                UpdatedItems = updatedItems
             });
         }
     }

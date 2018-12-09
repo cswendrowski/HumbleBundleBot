@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace HumbleBundleServerless.Models
 {
@@ -11,5 +7,7 @@ namespace HumbleBundleServerless.Models
         public HumbleBundle Bundle { get; set; }
 
         public bool IsUpdate { get; set; } = false;
+
+        public List<HumbleItem> UpdatedItems { get; internal set; } = new List<HumbleItem>();
     }
 }

@@ -66,7 +66,7 @@ namespace HumbleBundleServerless
 
                 foreach (var item in section.Items.Take(25))
                 {
-                    embed.description += item.Name + "\n";
+                    embed.description += GetItemName(item, queuedBundle.UpdatedItems);
                 }
 
                 message.embeds.Add(embed);
@@ -82,7 +82,7 @@ namespace HumbleBundleServerless
 
                     foreach (var item in section.Items.Skip(25).Take(25))
                     {
-                        embedContinued.description += item.Name + "\n";
+                        embedContinued.description += GetItemName(item, queuedBundle.UpdatedItems);
                     }
 
                     message.embeds.Add(embedContinued);
@@ -99,6 +99,15 @@ namespace HumbleBundleServerless
                     Payload = message
                 });
             }
+        }
+
+        private static string GetItemName(HumbleItem item, List<HumbleItem> updated)
+        {
+            if (updated.Any(x => x.Name == item.Name))
+            {
+                return "[New] " + item.Name + "\n";
+            }
+            return item.Name + "\n";
         }
 
         private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
