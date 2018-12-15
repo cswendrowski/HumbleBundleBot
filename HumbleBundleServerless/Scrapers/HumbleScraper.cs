@@ -53,7 +53,8 @@ namespace HumbleBundleBot
 
             if (!BundleUrls.Any())
             {
-                BundleUrls = GetBundleUrlsFromRss().ToList();
+                // We currently ignore the Humble Trove
+                BundleUrls = GetBundleUrlsFromRss().Where(x => !x.Contains("monthly/trove")).ToList();
             }
 
             _visitedUrls.Add(url);
