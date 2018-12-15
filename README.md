@@ -1,6 +1,10 @@
 # HumbleBundleBot
 
 ![](https://img.shields.io/badge/Built%20On-Azure%20Functions-blue.svg)
+[![Build status](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_apis/build/status/HumbleBundleBot%20CI)](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_build/latest?definitionId=18)
+![](https://ironmoosedevelopment.vsrm.visualstudio.com/_apis/public/Release/badge/94ed5e56-0dc7-4503-a43d-3f1f8a8240e1/1/1)
+
+<a href="https://www.buymeacoffee.com/cswendrowski" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
 Scrapes HumbleBundle.com for new Bundles and posts new bundles to different webhooks whenever a new Bundle shows up.
 Each Bundle can be sent to a different webhook, allowing easy organization of messages - in Discord, each channel can have webhooks associated with them for integrations like this.
@@ -10,6 +14,8 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 ![](https://s33.postimg.cc/3w0ux45wv/Capture.png)
 
 ![](https://s33.postimg.cc/z4e17ukxb/Capture.png)
+
+
 
 ## Changelog
 `11/8/2018` - You can now opt-in to Developer Messages - we will only send these out in case of major outages to indicate when the Bot is down for maintenance and when it is back up. This message type is currently only valid for Discord webhooks.
