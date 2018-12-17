@@ -64,28 +64,24 @@ namespace HumbleBundleServerless
                     description = ""
                 };
 
-                foreach (var item in section.Items.Take(25))
+                var itemsAdded = 0;
+
+                foreach (var item in section.Items)
                 {
                     embed.description += GetItemName(item, queuedBundle.UpdatedItems);
-                }
+                    itemsAdded++;
 
-                message.embeds.Add(embed);
-
-                if (section.Items.Count > 25)
-                {
-                    var embedContinued = new DiscordEmbed
+                    // Create a new embed every 25 items
+                    if (itemsAdded % 25 == 0)
                     {
-                        title = section.Title + " (Continued)",
-                        url = bundle.URL,
-                        description = ""
-                    };
-
-                    foreach (var item in section.Items.Skip(25).Take(25))
-                    {
-                        embedContinued.description += GetItemName(item, queuedBundle.UpdatedItems);
+                        message.embeds.Add(embed);
+                        embed = new DiscordEmbed
+                        {
+                            title = section.Title + " (Continued)",
+                            url = bundle.URL,
+                            description = ""
+                        };
                     }
-
-                    message.embeds.Add(embedContinued);
                 }
             }
 
