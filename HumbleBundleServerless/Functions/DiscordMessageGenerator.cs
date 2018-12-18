@@ -83,6 +83,9 @@ namespace HumbleBundleServerless
                         };
                     }
                 }
+
+                // Add last embed
+                message.embeds.Add(embed);
             }
 
             log.Info("Created message " + JsonConvert.SerializeObject(message));
