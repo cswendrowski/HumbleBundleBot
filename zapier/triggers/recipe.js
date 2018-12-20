@@ -60,7 +60,8 @@ const getRecipe = (z, bundle) => {
 const getFallbackRealRecipe = (z, bundle) => {
   // For the test poll, you should get some real data, to aid the setup process.
   const options = {
-    url: 'http://57b20fb546b57d1100a3c405.mockapi.io/api/recipes/'
+    url: `https://humblebundlenotifications.azurewebsites.net/api/LatestBundle/${bundle.inputData.type}`,
+    method: 'GET'
   };
 
   return z.request(options)
