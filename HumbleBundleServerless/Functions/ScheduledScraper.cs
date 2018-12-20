@@ -14,7 +14,7 @@ namespace HumbleBundleServerless
         [FunctionName("ScheduledScraper")]
         public static void Run(
 #if DEBUG
-            //[TimerTrigger("*/15 * * * * *")]TimerInfo myTimer,
+            [TimerTrigger("*/15 * * * * *")]TimerInfo myTimer,
 #else
             [TimerTrigger("0 0 */4 * * *")]TimerInfo myTimer,
 #endif
