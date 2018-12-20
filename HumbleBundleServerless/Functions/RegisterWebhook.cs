@@ -68,9 +68,10 @@ namespace HumbleBundleServerless.Functions
                         "This webhook URL is already registered for this Bundle type");
                 }
 
-                outTable.Add(new WebhookRegistrationEntity(bundleType, webhook, receiveUpdates, webhookType));
+                var created = new WebhookRegistrationEntity(bundleType, webhook, receiveUpdates, webhookType);
+                outTable.Add(created);
 
-                return req.CreateResponse(HttpStatusCode.Created);
+                return req.CreateResponse(HttpStatusCode.Created, new WebhookResponse(created));
             }
             catch (Exception e)
             {
