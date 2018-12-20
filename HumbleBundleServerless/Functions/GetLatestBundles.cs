@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace HumbleBundleServerless.Functions
 {
-    public static class GetLatestBundle
+    public static class GetLatestBundles
     {
-        [FunctionName("GetLatestBundle")]
+        [FunctionName("GetLatestBundles")]
         public static async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "LatestBundle/{type}")] HttpRequestMessage req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "LatestBundles/{type}/{cnt}")] HttpRequestMessage req,
             string type,
+            int cnt,
             [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentTableBundles,
             TraceWriter log)
         {
@@ -27,16 +28,16 @@ namespace HumbleBundleServerless.Functions
 
             var bundleType = (BundleTypes)typeAsInt;
 
-            var bundlesForType = currentTableBundles.Where(x => x.PartitionKey == bundleType.ToString());
+            var bundlesForType = currentTableBundles.Where(x => x.PartitionKey == bundleType.ToString()).ToList();
 
-            var latest = bundlesForType.ToList().OrderByDescending(x => x.Timestamp).FirstOrDefault();
-
-            if (latest == null)
+            if (!bundlesForType.Any())
             {
                 req.CreateResponse(HttpStatusCode.NotFound);
             }
 
-            return req.CreateResponse(HttpStatusCode.OK, latest.GetBundle());
+            var latest = bundlesForType.OrderByDescending(x => x.Timestamp).Take(cnt).Select(x => new BundleQueue() { Bundle = x.GetBundle(), IsUpdate = false } );
+
+            return req.CreateResponse(HttpStatusCode.OK, latest);
         }
     }
 }
