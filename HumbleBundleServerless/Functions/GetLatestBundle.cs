@@ -18,14 +18,25 @@ namespace HumbleBundleServerless.Functions
             [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentTableBundles,
             TraceWriter log)
         {
-            var latest = currentTableBundles.OrderByDescending(x => x.Timestamp).FirstOrDefault(x => x.PartitionKey == type);
+            var couldGetType = int.TryParse(type, out var typeAsInt);
+
+            if (!couldGetType)
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Could not parse Type " + type);
+            }
+
+            var bundleType = (BundleTypes)typeAsInt;
+
+            var bundlesForType = currentTableBundles.Where(x => x.PartitionKey == bundleType.ToString());
+
+            var latest = bundlesForType.ToList().OrderByDescending(x => x.Timestamp).FirstOrDefault();
 
             if (latest == null)
             {
                 req.CreateResponse(HttpStatusCode.NotFound);
             }
 
-            return req.CreateResponse(HttpStatusCode.OK, latest);
+            return req.CreateResponse(HttpStatusCode.OK, latest.GetBundle());
         }
     }
 }
