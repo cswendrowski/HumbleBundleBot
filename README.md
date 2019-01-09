@@ -4,12 +4,10 @@
 [![Build status](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_apis/build/status/HumbleBundleBot%20CI)](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_build/latest?definitionId=18)
 ![](https://ironmoosedevelopment.vsrm.visualstudio.com/_apis/public/Release/badge/94ed5e56-0dc7-4503-a43d-3f1f8a8240e1/1/1)
 
-<a href="https://www.buymeacoffee.com/cswendrowski" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
 Scrapes HumbleBundle.com for new Bundles and posts new bundles to different webhooks whenever a new Bundle shows up.
 Each Bundle can be sent to a different webhook, allowing easy organization of messages - in Discord, each channel can have webhooks associated with them for integrations like this.
 
-Scraping is done once and results are sent to all relevant webhooks using Serverless Functions and Azure Queue, making the system extremely cheap to run (currently free) and highly scalable.
+Scraping is done once and results are sent to all relevant webhooks using Serverless Functions and Azure Queue, making the system extremely cheap to run and highly scalable.
 
 ![](https://s33.postimg.cc/3w0ux45wv/Capture.png)
 
@@ -18,6 +16,10 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 
 
 ## Changelog
+`1/8/2019` - In response to popular demand, you can now *optionally* register a [Humble Bundle Partner](https://www.humblebundle.com/partner) referral that will be attached to all messages for *your webhook only*. This means that if you're a streamer who runs your own Discord and want your audience to be able to throw some of their purchase money at you, you can signup with Humble Bundle and register your partner name here to make it happen!
+
+Not a Partner and want to support me for developing this service? Use `cswendrowski` for the `Partner` value when signing up, as the example will show. Thank you!
+
 `11/8/2018` - You can now opt-in to Developer Messages - we will only send these out in case of major outages to indicate when the Bot is down for maintenance and when it is back up. This message type is currently only valid for Discord webhooks.
 
 `5/23/2018` - We now support the ability to register any webhook instead of just Discord webhooks.
@@ -26,7 +28,7 @@ If you have already registered a webhook before this date, your webhook registra
 
 If you register a webhook of type `RawJson` (1), you will receive a `BundleQueue` payload that looks similiar to the following:
 
-```
+```json
 {
   "Bundle": {
     "Name": "Humble Indie Bundle 19",
@@ -82,7 +84,7 @@ If you register a webhook of type `RawJson` (1), you will receive a `BundleQueue
 }
 ```
 
-## How To Register a Webhook
+### How To Register a Webhook with a Partner link
 
 *All requests to the endpoints require a header of `Content-Type: application/json`*
 
@@ -93,10 +95,10 @@ Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/
     "type": <Valid Bundle Type Code>,
     "webhook": "<YOUR DISCORD WEBHOOK URL>",
     "sendUpdates": <true|false>,
-    "webhookType": <Valid Webhook Type Code>
+    "webhookType": <Valid Webhook Type Code>,
+    "partner": "<YOUR PARTNER NAME OF CHOICE>"
 }
 ```
-
 The following Bundle types are valid:
 
 | Type        | Type Code |
@@ -114,6 +116,48 @@ The following Webhook types are valid:
 | ----------- | --------- |
 | Discord     | 0         |
 | RawJson     | 1         |
+
+Example of subscribing to the Games Bundle with a `Discord` webhook with a Partner link of me (Thanks if you do this!):
+
+```json
+{
+    "type": 0,
+    "webhook": "https://discordapp.com/api/webhooks/abcd123...",
+    "sendUpdates": true,
+    "webhookType": 0,
+    "partner": "cswendrowski"
+}
+```
+
+Webhook URLs are encrypted before they are stored.
+
+A Partner link will add a header to the page indicating who referred the user to the bundle:
+![](https://i.postimg.cc/Jzn62wPM/image.png)
+
+It will also add a slider bar to the "Choose where your money goes section" where users can adjust how much the Partner receives (even down to nothing!)
+![](https://i.postimg.cc/Kzy5FCrK/image.png)
+
+#### How to find your Partner name
+
+Are you signed up as a Partner and confused about what value to use when registering?
+
+You can find your Partner name at on the [Partner Dashboard](https://www.humblebundle.com/partner/dashboard), under the "Active partner" section:
+![](https://i.postimg.cc/k4zqBFGt/image.png)
+
+## How To Register a Webhook
+
+*All requests to the endpoints require a header of `Content-Type: application/json`*
+
+Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/api/RegisterWebhook with a Body of the following format:
+
+```
+{
+    "type": <Valid Bundle Type Code>,
+    "webhook": "<YOUR DISCORD WEBHOOK URL>",
+    "sendUpdates": <true|false>,
+    "webhookType": <Valid Webhook Type Code>
+}
+```
 
 Example of subscribing to the Games Bundle with a `Discord` webhook:
 
@@ -141,23 +185,4 @@ Make a HTTP DELETE request to https://humblebundlenotifications.azurewebsites.ne
     "webhookType": 0
 }
 ```
-
-## Roadmap
-- [X] Discord Embed Formatting
-- [X] Discord Webhook for message creation
-- [X] Azure Table Storage for persistent storage
-- [X] Swap from IronWebScraping to ScrapySharp as scraping library
-- [X] General Games scraping
-- [X] Books Scraping
-- [X] Mobile Scraping
-- [X] API for registering new webhooks to different bundles rather than current static implementation
-- [X] Ability to "unsubscribe" by deleting Webhook registration from system
-- [X] Rework entire system as Serverless App
-- [X] Polish Embed Formatting
-- [X] Software Scraping
-- [X] Add data-at-rest encryption to Webhook URL's
-- [X] Ability to send out messages about updates to bundles
-- [X] Extralife "Special" scraping
-- [X] Raw JSON registering
-- [ ] Micro-site to make Webhook registration / deregistration easier
 
