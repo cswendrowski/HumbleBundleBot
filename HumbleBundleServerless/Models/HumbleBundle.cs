@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -8,10 +7,10 @@ namespace HumbleBundleServerless.Models
     [DebuggerDisplay("{Name}")]
     public class HumbleBundle
     {
-        public String Name { get; set; }
-        public String URL { get; set; }
-        public String Description { get; set; }
-        public String ImageUrl { get; set; }
+        public string Name { get; set; }
+        public string URL { get; set; }
+        public string Description { get; set; }
+        public string ImageUrl { get; set; }
         public BundleTypes Type { get; set; }
         public List<HumbleSection> Sections { get; set; } = new List<HumbleSection>();
 
@@ -26,12 +25,12 @@ namespace HumbleBundleServerless.Models
 
     public class HumbleSection
     {
-        public String Title { get; set; }
+        public string Title { get; set; }
         public List<HumbleItem> Items { get; set; } = new List<HumbleItem>();
     }
 
     public class HumbleItem
     {
-        public String Name { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -74,7 +74,7 @@ namespace HumbleBundleBot
                         Name = GetOgPropertyValue(response, "title"),
                         Description = GetOgPropertyValue(response, "description"),
                         ImageUrl = GetOgPropertyValue(response, "image"),
-                        URL = finalUrl,
+                        URL = url,
                         Type = GetBundleType(url)
                     };
 
@@ -97,31 +97,32 @@ namespace HumbleBundleBot
         }
 
         /**
+         * Note: No longer used, left for reference
          * The bundles tab is injected via JS after page load. The data it injects is already in-page, however, so we can
          * parse and deserialize it to get the data we want.
          **/
-        private static IEnumerable<dynamic> GetBundlesTab(HtmlNode response)
-        {
-            const string startString = "\"mosaic\":";
-            const string endString = "\"user\": {}";
+        //private static IEnumerable<dynamic> GetBundlesTab(HtmlNode response)
+        //{
+        //    const string startString = "\"mosaic\":";
+        //    const string endString = "\"user\": {}";
 
-            var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString, StringComparison.Ordinal) + startString.Length);
+        //    var jsonResponse = response.InnerHtml.Substring(response.InnerHtml.IndexOf(startString, StringComparison.Ordinal) + startString.Length);
 
-            var endIndex = jsonResponse.IndexOf(endString, StringComparison.Ordinal);
-            jsonResponse = jsonResponse.Substring(0, endIndex - "\r\n      ".Length);
+        //    var endIndex = jsonResponse.IndexOf(endString, StringComparison.Ordinal);
+        //    jsonResponse = jsonResponse.Substring(0, endIndex - "\r\n      ".Length);
 
-            jsonResponse = jsonResponse.Replace("True", "true").Replace("False", "false");
+        //    jsonResponse = jsonResponse.Replace("True", "true").Replace("False", "false");
 
-            var settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                MissingMemberHandling = MissingMemberHandling.Ignore
-            };
+        //    var settings = new JsonSerializerSettings
+        //    {
+        //        NullValueHandling = NullValueHandling.Ignore,
+        //        MissingMemberHandling = MissingMemberHandling.Ignore
+        //    };
 
-            var converted = JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
+        //    var converted = JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse, settings);
 
-            return converted[0]["products"];
-        }
+        //    return converted[0]["products"];
+        //}
 
         private static IEnumerable<string> GetBundleUrlsFromRss()
         {
@@ -139,6 +140,10 @@ namespace HumbleBundleBot
                 {
                     continue;
                 }
+                //else if (summary.Contains("/monthly"))
+                //{
+                //    yield return "https://www.humblebundle.com/monthly";
+                //}
 
                 var start = summary.IndexOf("https://www.humblebundle.com");
                 var end = summary.IndexOf("?utm_source");
@@ -148,19 +153,19 @@ namespace HumbleBundleBot
 
         private static BundleTypes GetBundleType(string url)
         {
-            if (url.Contains("games") || url.Contains("monthly"))
+            if (url.Contains("/games/") || url.Contains("/monthly"))
             {
                 return BundleTypes.GAMES;
             }
-            if (url.Contains("mobile"))
+            if (url.Contains("/mobile/"))
             {
                 return BundleTypes.MOBILE;
             }
-            if (url.Contains("books"))
+            if (url.Contains("/books/"))
             {
                 return BundleTypes.BOOKS;
             }
-            if (url.Contains("software"))
+            if (url.Contains("/software/"))
             {
                 return BundleTypes.SOFTWARE;
             }

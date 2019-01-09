@@ -1,12 +1,9 @@
-using System;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using HumbleBundleBot;
 using HumbleBundleServerless.Models;
-using System.Linq;
-using System.Text;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Linq;
 
 namespace HumbleBundleServerless
 {
@@ -27,15 +24,20 @@ namespace HumbleBundleServerless
 
             foreach (var webhook in webhooks)
             {
+                if (!string.IsNullOrEmpty(webhook.Partner))
+                {
+                    queuedBundle.Bundle.URL += "?partner=" + webhook.Partner;
+                }
+
                 messageQueue.Add(new JsonMessage()
                 {
-                    WebhookUrl = webhook,
+                    WebhookUrl = webhook.GetDecryptedWebhook(),
                     Payload = queuedBundle
                 });
             }
         }
 
-        private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
+        private static List<WebhookRegistrationEntity> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
         {
             var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString()).ToList();
 
@@ -46,7 +48,7 @@ namespace HumbleBundleServerless
                 discordHooks = discordHooks.Where(x => x.ShouldRecieveUpdates);
             }
 
-            return discordHooks.ToList().Select(x => x.GetDecryptedWebhook()).ToList();
+            return discordHooks.ToList();
         }
     }
 }

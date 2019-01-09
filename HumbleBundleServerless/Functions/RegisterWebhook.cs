@@ -28,6 +28,7 @@ namespace HumbleBundleServerless.Functions
                 int bundleTypeValue = data?.type;
                 string webhook = data?.webhook;
                 bool receiveUpdates = data?.sendUpdates;
+                string partner = data?.partner;
                 WebhookType webhookTypeValue = data?.webhookType;
 
                 log.Info($"Recieved webhook registration for type {bundleTypeValue}. RecieveUpdates? {receiveUpdates}");
@@ -68,7 +69,7 @@ namespace HumbleBundleServerless.Functions
                         "This webhook URL is already registered for this Bundle type");
                 }
 
-                outTable.Add(new WebhookRegistrationEntity(bundleType, webhook, receiveUpdates, webhookType));
+                outTable.Add(new WebhookRegistrationEntity(bundleType, webhook, receiveUpdates, webhookType, partner));
 
                 return req.CreateResponse(HttpStatusCode.Created);
             }

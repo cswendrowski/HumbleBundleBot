@@ -92,11 +92,32 @@ namespace HumbleBundleServerless
 
             foreach (var webhook in webhooks)
             {
+                if (!string.IsNullOrEmpty(webhook.Partner))
+                {
+                    AddPartnerLink(message, webhook.Partner);
+                }
+
                 messageQueue.Add(new DiscordMessage
                 {
-                    WebhookUrl = webhook,
+                    WebhookUrl = webhook.GetDecryptedWebhook(),
                     Payload = message
                 });
+            }
+        }
+
+        private static void AddPartnerLink(DiscordWebhookPayload message, string partner)
+        {
+            foreach (var embed in message.embeds)
+            {
+                if (!string.IsNullOrEmpty(embed.url))
+                {
+                    embed.url += "?partner=" + partner;
+                }
+
+                if (embed.author != null)
+                {
+                    embed.author.url += "?partner=" + partner;
+                }
             }
         }
 
@@ -109,7 +130,7 @@ namespace HumbleBundleServerless
             return item.Name + "\n";
         }
 
-        private static List<String> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
+        private static List<WebhookRegistrationEntity> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
         {
             var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString()).ToList();
 
@@ -120,7 +141,7 @@ namespace HumbleBundleServerless
                 discordHooks = discordHooks.Where(x => x.ShouldRecieveUpdates);
             }
 
-            return discordHooks.ToList().Select(x => x.GetDecryptedWebhook()).ToList();
+            return discordHooks.ToList();
         }
     }
 }
