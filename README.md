@@ -11,8 +11,7 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 
 ![](https://s33.postimg.cc/3w0ux45wv/Capture.png)
 
-![](https://s33.postimg.cc/z4e17ukxb/Capture.png)
-
+![](https://i.postimg.cc/3JJQYcnb/image.png)
 
 
 ## Changelog
@@ -144,7 +143,7 @@ Are you signed up as a Partner and confused about what value to use when registe
 You can find your Partner name at on the [Partner Dashboard](https://www.humblebundle.com/partner/dashboard), under the "Active partner" section:
 ![](https://i.postimg.cc/k4zqBFGt/image.png)
 
-## How To Register a Webhook
+## How To Register a Webhook without a Partner link
 
 *All requests to the endpoints require a header of `Content-Type: application/json`*
 
