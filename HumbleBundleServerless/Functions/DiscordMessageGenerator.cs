@@ -114,7 +114,7 @@ namespace HumbleBundleServerless
                     embed.url += "?partner=" + partner;
                 }
 
-                if (embed.author != null)
+                if (embed.author != null && !string.IsNullOrEmpty(embed.author.url))
                 {
                     embed.author.url += "?partner=" + partner;
                 }
