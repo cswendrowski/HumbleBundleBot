@@ -1,0 +1,52 @@
+﻿@using HumbleBundleBotRegistration.Models
+@using HumbleBundleBotRegistration.Services
+@inject IWebhookService WebhookService
+
+<form>
+    <IM_Select Id="bundleType" Title="Bundle Type" bind-Value="@WebhookInfo.Type" />
+    <IM_TextBox Id="webHook" Title="Web Hook" bind-Value="@WebhookInfo.Webhook" />
+    <IM_Select Id="webhookType" Title="Web Hook Type" bind-Value="@WebhookInfo.WebhookType" />
+    <div class="btn btn-primary" onclick="@Deregister">Deregister</div>
+    <Spinner IsBusy="@IsProcessing" />
+    @if (Completed)
+    {
+        if (Success)
+        {
+            <span class="badge badge-success">Success</span>
+        }
+        else
+        {
+            <span class="badge badge-danger">Error</span>
+        }
+    }
+</form>
+
+@functions
+{
+    protected DeregistrationWebhook WebhookInfo { get; set; }
+
+    protected bool IsProcessing { get; set; }
+
+    protected bool Completed { get; set; }
+
+    protected bool Success { get; set; }
+
+    protected override void OnInit()
+    {
+
+        Completed = false;
+
+        WebhookInfo = new DeregistrationWebhook()
+        {
+            Type = BundleType.Games,
+            WebhookType = WebhookType.Discord
+        };
+    }
+
+    public async Task Deregister()
+    {
+        var success = await WebhookService.DeregisterWebhook(WebhookInfo);
+
+        Console.WriteLine(success);
+    }
+}

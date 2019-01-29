@@ -1,0 +1,72 @@
+﻿@using HumbleBundleBotRegistration.Models
+@using HumbleBundleBotRegistration.Services
+@inject IWebhookService WebhookService
+
+<form>
+    <IM_Select Id="bundleType" Title="Bundle Type" bind-Value="@WebhookInfo.Type" />
+    <IM_TextBox Id="webHook" Title="Web Hook" bind-Value="@WebhookInfo.Webhook" />
+    <IM_Checkbox Id="sendUpdates" Title="Send Updates" bind-Value="@WebhookInfo.SendUpdates" />
+    <IM_Select Id="webhookType" Title="Web Hook Type" bind-Value="@WebhookInfo.WebhookType" />
+    <IM_TextBox Id="partner" Title="Partner Name" bind-Value="@WebhookInfo.Partner" />
+    <div class="btn btn-primary" onclick="@Register">
+        Register
+    </div>
+    <Spinner IsBusy="@IsProcessing" />
+    @if (Completed)
+    {
+        if (Success)
+        {
+            <span class="badge badge-success">Success</span>
+        }
+        else
+        {
+            <span class="badge badge-danger">Error</span>
+        }
+    }
+</form>
+
+@functions
+{
+
+    protected RegistrationWebhook WebhookInfo { get; set; }
+
+    protected bool IsProcessing { get; set; }
+
+    protected bool Completed { get; set; }
+
+    protected bool Success { get; set; }
+
+    protected override void OnInit()
+    {
+        Completed = false;
+
+        WebhookInfo = new RegistrationWebhook
+        {
+            Type = BundleType.Games,
+            SendUpdates = true,
+            WebhookType = WebhookType.Discord,
+            Partner = "cswendrowski"
+        };
+    }
+
+    public async Task Register()
+    {
+        try
+        {
+            IsProcessing = true;
+
+            Success = await WebhookService.RegisterWebhook(WebhookInfo);
+        }
+        catch (Exception ex)
+        {
+
+        }
+        finally
+        {
+            IsProcessing = false;
+            Completed = true;
+        }
+
+    }
+
+}

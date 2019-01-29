@@ -1,0 +1,37 @@
+﻿@page "/"
+
+<h1>HumbleBundleBot</h1>
+
+
+<p>
+    Scrapes HumbleBundle.com for new Bundles and posts new bundles to different webhooks whenever a new Bundle shows up. 
+    Each Bundle can be sent to a different webhook, allowing easy organization of messages - in Discord, each channel 
+    can have webhooks associated with them for integrations like this. 
+</p>
+<p>
+    Scraping is done once and results are sent to all relevant webhooks using Serverless Functions and Azure Queue, making the system extremely cheap to run and highly scalable.
+</p>
+
+<br/>
+<br/>
+<br/>
+
+<h4>Changelog</h4>
+<p>
+
+    <i>1/8/2019</i> - In response to popular demand, you can now optionally register a Humble Bundle Partner referral that will be attached to all messages for your webhook only.
+    This means that if you're a streamer who runs your own Discord and want your audience to be able to throw some of their purchase money at you, you can signup with Humble
+    Bundle and register your partner name here to make it happen!
+    <br/>
+    Not a Partner and want to support me for developing this service? Use cswendrowski for the Partner value when signing up, as the example will show. Thank you!
+</p>
+
+<p>
+    <i>11/8/2018</i> - You can now opt-in to Developer Messages - we will only send these out in case of major outages to indicate when the Bot is down for maintenance 
+    and when it is back up. This message type is currently only valid for Discord webhooks.
+</p>
+
+<p>
+    <i>5/23/2018</i> - We now support the ability to register any webhook instead of just Discord webhooks. If you register a Discord webhook the experience is still the 
+    same and you will receive Discord formatted messages. If you have already registered a webhook before this date, your webhook registration has been defaulted to Discord.
+</p>

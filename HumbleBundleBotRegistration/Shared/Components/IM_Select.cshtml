@@ -1,0 +1,25 @@
+﻿@typeparam T
+@inherits ImFormComponentBase<T>
+
+<div class="form-group">
+    <label for="@Id">@Title</label>
+    <select class="form-control" id="@Id" value="@Value" onchange="@ValueChange">    
+        @foreach (var option in ListOfValues)
+        {
+            <option>@option.ToString()</option>
+        }
+    </select>
+</div>
+
+@functions
+{
+
+    List<T> ListOfValues { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        ListOfValues = Enum.GetValues(typeof(T)).Cast<T>().ToList();
+    }
+
+}
