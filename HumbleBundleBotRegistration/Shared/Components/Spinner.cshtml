@@ -1,0 +1,13 @@
+﻿@if (IsBusy)
+{
+    <div class="spinner-grow" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+}
+
+@functions
+{
+
+    [Parameter] protected bool IsBusy { get; set; }
+
+}
