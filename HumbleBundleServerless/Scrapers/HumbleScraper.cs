@@ -146,6 +146,12 @@ namespace HumbleBundleBot
                 //}
 
                 var start = summary.IndexOf("https://www.humblebundle.com");
+
+                if (start == -1)
+                {
+                    continue;
+                }
+
                 var end = summary.IndexOf("?utm_source");
                 yield return summary.Substring(start, end - start);
             }
