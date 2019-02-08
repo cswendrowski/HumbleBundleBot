@@ -22,76 +22,72 @@ namespace HumbleBundleServerless
             log.Info($"Message generator trigger function processed: {queuedBundle.Bundle.Name}");
 
             var bundle = queuedBundle.Bundle;
-
             var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Bundle.Type, queuedBundle.IsUpdate);
-
             log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Bundle.Type}");
-
-            var content = "New Bundle: " + bundle.Name;
-
-            if (queuedBundle.IsUpdate)
-            {
-                content = "Bundle Updated: " + bundle.Name;
-            }
-
-            var message = new DiscordWebhookPayload
-            {
-                content = content,
-                embeds = new List<DiscordEmbed>()
-            };
-
-            message.embeds.Add(new DiscordEmbed()
-            {
-                url = bundle.URL,
-                title = bundle.Description,
-                image = new ImageField()
-                {
-                    url = bundle.ImageUrl
-                },
-                author = new AuthorField()
-                {
-                    name = "Humble Bundle",
-                    url = bundle.URL
-                }
-            });
-
-            foreach (var section in bundle.Sections)
-            {
-                var embed = new DiscordEmbed
-                {
-                    title = section.Title,
-                    url = bundle.URL,
-                    description = ""
-                };
-
-                var itemsAdded = 0;
-
-                foreach (var item in section.Items)
-                {
-                    embed.description += GetItemName(item, queuedBundle.UpdatedItems);
-                    itemsAdded++;
-
-                    // Create a new embed every 25 items
-                    if (itemsAdded % 25 == 0)
-                    {
-                        message.embeds.Add(embed);
-                        embed = new DiscordEmbed
-                        {
-                            title = section.Title + " (Continued)",
-                            url = bundle.URL,
-                            description = ""
-                        };
-                    }
-                }
-
-                // Add last embed
-                message.embeds.Add(embed);
-            }
-
-            log.Info("Created message " + JsonConvert.SerializeObject(message));
 
             foreach (var webhook in webhooks)
             {
+                var content = "New Bundle: " + bundle.Name;
+
+                if (queuedBundle.IsUpdate)
+                {
+                    content = "Bundle Updated: " + bundle.Name;
+                }
+
+                var message = new DiscordWebhookPayload
+                {
+                    content = content,
+                    embeds = new List<DiscordEmbed>()
+                };
+
+                message.embeds.Add(new DiscordEmbed()
+                {
+                    url = bundle.URL,
+                    title = bundle.Description,
+                    image = new ImageField()
+                    {
+                        url = bundle.ImageUrl
+                    },
+                    author = new AuthorField()
+                    {
+                        name = "Humble Bundle",
+                        url = bundle.URL
+                    }
+                });
+
+                foreach (var section in bundle.Sections)
+                {
+                    var embed = new DiscordEmbed
+                    {
+                        title = section.Title,
+                        url = bundle.URL,
+                        description = ""
+                    };
+
+                    var itemsAdded = 0;
+
+                    foreach (var item in section.Items)
+                    {
+                        embed.description += GetItemName(item, queuedBundle.UpdatedItems);
+                        itemsAdded++;
+
+                        // Create a new embed every 25 items
+                        if (itemsAdded % 25 == 0)
+                        {
+                            message.embeds.Add(embed);
+                            embed = new DiscordEmbed
+                            {
+                                title = section.Title + " (Continued)",
+                                url = bundle.URL,
+                                description = ""
+                            };
+                        }
+                    }
+
+                    // Add last embed
+                    message.embeds.Add(embed);
+                }
+
                 if (!string.IsNullOrEmpty(webhook.Partner))
                 {
                     AddPartnerLink(message, webhook.Partner);
