@@ -44,7 +44,7 @@ namespace HumbleBundleBot
             var document = web.Load(url);
             var response = document.DocumentNode;
 
-            var finalUrl = GetOgPropertyValue(response, "url");
+            var finalUrl = GetMetaValueByOgProperty(response, "url");
 
             //if (!BundlesTab.Any())
             //{
@@ -71,12 +71,17 @@ namespace HumbleBundleBot
                 {
                     var bundle = new HumbleBundle
                     {
-                        Name = GetOgPropertyValue(response, "title"),
-                        Description = GetOgPropertyValue(response, "description"),
-                        ImageUrl = GetOgPropertyValue(response, "image"),
+                        Name = GetMetaValueByOgProperty(response, "title"),
+                        Description = GetMetaValueByOgProperty(response, "description"),
+                        ImageUrl = GetMetaValueByOgProperty(response, "image"),
                         URL = url,
                         Type = GetBundleType(url)
                     };
+
+                    if (string.IsNullOrEmpty(bundle.ImageUrl))
+                    {
+                        bundle.ImageUrl = GetMetaValueByName(response, "twitter:image");
+                    }
 
                     ScrapeSections(bundle, response);
 
@@ -91,9 +96,37 @@ namespace HumbleBundleBot
             
         }
 
-        private static string GetOgPropertyValue(HtmlNode response, string property)
+        private static string GetMetaValueByOgProperty(HtmlNode response, string property)
         {
-            return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == "og:" + property).Attributes["content"].Value;
+            return GetMetaValueByProperty(response, "og:" + property);
+        }
+
+        private static string GetMetaValueByProperty(HtmlNode response, string property)
+        {
+            try
+            {
+                return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("property")).First(x => x.Attributes["property"].Value == property).Attributes["content"].Value;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Could not retrieve meta with property " + property);
+                Debug.WriteLine(e.Message);
+                return "";
+            }
+        }
+
+        private static string GetMetaValueByName(HtmlNode response, string name)
+        {
+            try
+            {
+                return response.CssSelect("meta").Where(x => x.Attributes.HasKeyIgnoreCase("name")).First(x => x.Attributes["name"].Value == name).Attributes["content"].Value;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Could not retrieve meta with name " + name);
+                Debug.WriteLine(e.Message);
+                return "";
+            }
         }
 
         /**
