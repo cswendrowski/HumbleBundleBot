@@ -15,8 +15,13 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 
 ![](https://i.postimg.cc/3JJQYcnb/image.png)
 
+## Get started fast with our registration site
+
+[https://humblebundlenotificationssite.azurewebsites.net](https://humblebundlenotificationssite.azurewebsites.net/)
 
 ## Changelog
+`3/13/2019` - Thanks to [BallBrian](https://github.com/ballbrian), we now have a nice blazor powered registration site! Check it out here: [https://humblebundlenotificationssite.azurewebsites.net](https://humblebundlenotificationssite.azurewebsites.net/)
+
 `1/8/2019` - In response to popular demand, you can now *optionally* register a [Humble Bundle Partner](https://www.humblebundle.com/partner) referral that will be attached to all messages for *your webhook only*. This means that if you're a streamer who runs your own Discord and want your audience to be able to throw some of their purchase money at you, you can signup with Humble Bundle and register your partner name here to make it happen!
 
 Not a Partner and want to support me for developing this service? Use `cswendrowski` for the `Partner` value when signing up, as the example will show. Thank you!
@@ -84,6 +89,8 @@ If you register a webhook of type `RawJson` (1), you will receive a `BundleQueue
   "IsUpdate": false
 }
 ```
+
+## API Docs
 
 ### How To Register a Webhook with a Partner link
 
