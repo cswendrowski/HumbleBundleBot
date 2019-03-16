@@ -2,6 +2,8 @@
 @using HumbleBundleBotRegistration.Services
 @inject IWebhookService WebhookService
 
+<p>Generate a webhook by following these instructions: <a href="https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks">https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks</a></p>
+
 <form>
     <IM_Select Id="bundleType" Title="Bundle Type" bind-Value="@WebhookInfo.Type" />
     <IM_TextBox Id="webHook" Title="Web Hook" bind-Value="@WebhookInfo.Webhook" />
