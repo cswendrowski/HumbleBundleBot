@@ -15,6 +15,10 @@ Scraping is done once and results are sent to all relevant webhooks using Server
 
 ![](https://i.postimg.cc/3JJQYcnb/image.png)
 
+## How to generate a webhook
+
+https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+
 ## Get started fast with our registration site
 
 [https://humblebundlenotificationssite.azurewebsites.net](https://humblebundlenotificationssite.azurewebsites.net/)
