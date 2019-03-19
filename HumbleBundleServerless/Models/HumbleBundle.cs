@@ -29,6 +29,7 @@ namespace HumbleBundleServerless.Models
         public List<HumbleItem> Items { get; set; } = new List<HumbleItem>();
     }
 
+    [DebuggerDisplay("{Name}")]
     public class HumbleItem
     {
         public string Name { get; set; }

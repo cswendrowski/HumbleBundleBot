@@ -260,6 +260,11 @@ namespace HumbleBundleBot
         {
             foreach (var itemTitle in parsedSection.CssSelect(".dd-image-box-caption"))
             {
+                var lockedContentChildren = itemTitle.CssSelect(".sr-only");
+                foreach (var child in lockedContentChildren)
+                {
+                    itemTitle.RemoveChild(child);
+                }
                 var itemName = itemTitle.InnerText.CleanInnerText();
                 if (section.Items.All(x => x.Name != itemName) && !itemName.StartsWith("More in"))
                 {
