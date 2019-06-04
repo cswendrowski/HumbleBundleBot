@@ -16,7 +16,7 @@ namespace HumbleBundleServerless
 #if DEBUG
             [TimerTrigger("*/15 * * * * *")]TimerInfo myTimer,
 #else
-            [TimerTrigger("0 0 */4 * * *")]TimerInfo myTimer,
+            [TimerTrigger("0 0 */1 * * *")]TimerInfo myTimer,
 #endif
             [Table("humbleBundles")] IQueryable<HumbleBundleEntity> currentTableBundles,
             [Table("humbleBundles")] ICollector<HumbleBundleEntity> bundlesTable,

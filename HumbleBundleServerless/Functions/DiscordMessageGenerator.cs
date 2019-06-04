@@ -1,12 +1,10 @@
-using System;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using HumbleBundleBot;
 using HumbleBundleServerless.Models;
-using System.Linq;
-using System.Text;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.WindowsAzure.Storage.Table;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Linq;
 
 namespace HumbleBundleServerless
 {
@@ -16,14 +14,14 @@ namespace HumbleBundleServerless
         public static void Run(
             [QueueTrigger("bundlequeue")] BundleQueue queuedBundle,
             [Queue("discordmessagequeue")] ICollector<DiscordMessage> messageQueue,
-            [Table("webhookRegistration")] IQueryable<WebhookRegistrationEntity> existingWebhooks,
+            [Table("webhookRegistration")] CloudTable existingWebhooks,
             TraceWriter log)
         {
             log.Info($"Message generator trigger function processed: {queuedBundle.Bundle.Name}");
 
             var bundle = queuedBundle.Bundle;
-            var webhooks = GetAllWebhooksForBundleType(existingWebhooks, queuedBundle.Bundle.Type, queuedBundle.IsUpdate);
-            log.Info($"Found {webhooks.Count} webhooks for type {queuedBundle.Bundle.Type}");
+            var webhooks = existingWebhooks.GetAllWebhooksForBundleType(queuedBundle.Bundle.Type, queuedBundle.IsUpdate);
+            int queued = 0;
 
             foreach (var webhook in webhooks)
             {
@@ -98,7 +96,10 @@ namespace HumbleBundleServerless
                     WebhookUrl = webhook.GetDecryptedWebhook(),
                     Payload = message
                 });
+                queued++;
             }
+
+            log.Info($"Queued {queued} payloads for type {queuedBundle.Bundle.Type}");
         }
 
         private static void AddPartnerLink(DiscordWebhookPayload message, string partner)
@@ -124,20 +125,6 @@ namespace HumbleBundleServerless
                 return "[New] " + item.Name + "\n";
             }
             return item.Name + "\n";
-        }
-
-        private static List<WebhookRegistrationEntity> GetAllWebhooksForBundleType(IQueryable<WebhookRegistrationEntity> existingWebhooks, BundleTypes type, bool isUpdate)
-        {
-            var webhooksForType = existingWebhooks.Where(x => x.PartitionKey == type.ToString()).ToList();
-
-            var discordHooks = webhooksForType.Where(x => x.WebhookType == (int) WebhookType.Discord);
-
-            if (isUpdate)
-            {
-                discordHooks = discordHooks.Where(x => x.ShouldRecieveUpdates);
-            }
-
-            return discordHooks.ToList();
         }
     }
 }
