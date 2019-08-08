@@ -119,8 +119,9 @@ The following Bundle types are valid:
 | Books       | 1         |
 | Mobile      | 2         |
 | Software    | 3         |
-| Mixed       | 4         |
+| Mixed (Mixed Content Bundles)  | 4 |
 | Developer Messages (Valid for Discord only)| 5  |
+| All Bundles | 6         |
 
 The following Webhook types are valid:
 
