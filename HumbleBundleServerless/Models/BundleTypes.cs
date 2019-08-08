@@ -7,6 +7,7 @@
         MOBILE,
         SOFTWARE,
         SPECIAL,
-        DEVELOPER_MESSAGES
+        DEVELOPER_MESSAGES,
+        ALL
     }
 }

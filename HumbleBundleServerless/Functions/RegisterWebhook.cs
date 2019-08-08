@@ -33,7 +33,7 @@ namespace HumbleBundleServerless.Functions
 
                 log.Info($"Recieved webhook registration for type {bundleTypeValue}. RecieveUpdates? {receiveUpdates}");
 
-                var lastBundleType = BundleTypes.DEVELOPER_MESSAGES;
+                var lastBundleType = BundleTypes.ALL;
 
                 if (bundleTypeValue < 0 || bundleTypeValue > (int) lastBundleType)
                 {
