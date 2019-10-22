@@ -9,6 +9,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.ServiceModel.Syndication;
 using System.Xml;
+using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using System.IO;
+using System.Web;
 
 namespace HumbleBundleBot
 {
@@ -41,6 +46,9 @@ namespace HumbleBundleBot
         private void ScrapePage(string url)
         {
             var web = new HtmlWeb();
+            url = HttpUtility.UrlDecode(url);
+            url = url.TrimEnd('?');
+            if (!url.StartsWith("https://")) url = "https://" + url;
             var document = web.Load(url);
             var response = document.DocumentNode;
 
@@ -54,7 +62,7 @@ namespace HumbleBundleBot
             if (!BundleUrls.Any())
             {
                 // We currently ignore the Humble Trove
-                BundleUrls = GetBundleUrlsFromRss().Where(x => !x.Contains("monthly/trove")).ToList();
+                BundleUrls = GetBundleUrlsFromRss().Distinct().ToList();
             }
 
             _visitedUrls.Add(url);
@@ -167,27 +175,71 @@ namespace HumbleBundleBot
 
             foreach (var item in feed.Items.Where(x => x.PublishDate >= lookbackTime))
             {
+                var categories = item.Categories.Select(x => x.Name).Distinct();
                 var summary = item.Summary.Text;
 
-                if (summary.Contains("https://www.humblebundle.com/store"))
+                if (categories.Contains("humble trove") || categories.Contains("humble store"))
                 {
                     continue;
                 }
-                //else if (summary.Contains("/monthly"))
-                //{
-                //    yield return "https://www.humblebundle.com/monthly";
-                //}
 
-                var start = summary.IndexOf("https://www.humblebundle.com");
+                var start = summary.IndexOf("https://blog.humblebundle.com");
 
                 if (start == -1)
                 {
                     continue;
-                }
+                } 
 
-                var end = summary.IndexOf("?utm_source");
-                yield return summary.Substring(start, end - start);
+                var end = summary.IndexOf("\" class=\"more-link\"");
+                var blogUrl = summary.Substring(start, end - start);
+
+                yield return ScrapeBlogPost(blogUrl);
             }
+        }
+
+        private static string ScrapeBlogPost(string blogUrl)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(blogUrl);
+            httpWebRequest.Timeout = (int) TimeSpan.FromMinutes(1).TotalMilliseconds;
+            httpWebRequest.ServerCertificateValidationCallback = AllowAll;
+            using (HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+            {
+                if (httpWebResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    using (var responseStream = httpWebResponse.GetResponseStream())
+                    {
+                        using (var reader = new StreamReader(responseStream))
+                        {
+                            var htmlstring = reader.ReadToEnd();
+                            HtmlDocument document = new HtmlDocument();
+                            document.LoadHtml(htmlstring);
+
+                            var response = document.DocumentNode;
+
+                            var learnMoreButton = response.CssSelect(".wp-block-button__link").First();
+                            var badHref = learnMoreButton.Attributes["href"].Value;
+
+                            if (badHref == "https://www.humblebundle.com/monthly") return badHref;
+
+                            var start = badHref.IndexOf("www.humblebundle.com");
+                            var end = badHref.IndexOf("utm_source");
+                            var goodUrl = badHref.Substring(start, end - start);
+
+                            return goodUrl;
+                        }
+                    }
+
+                }
+                else
+                {
+                    throw new Exception("Could not get blog url");
+                }
+            }
+        }
+
+        private static bool AllowAll(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
         }
 
         private static BundleTypes GetBundleType(string url)
