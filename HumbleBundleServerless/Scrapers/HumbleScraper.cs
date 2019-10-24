@@ -54,15 +54,9 @@ namespace HumbleBundleBot
 
             var finalUrl = GetMetaValueByOgProperty(response, "url");
 
-            //if (!BundlesTab.Any())
-            //{
-            //    BundlesTab = GetBundlesTab(response).ToList();
-            //}
-
             if (!BundleUrls.Any())
             {
-                // We currently ignore the Humble Trove
-                BundleUrls = GetBundleUrlsFromRss().Distinct().ToList();
+                BundleUrls = GetBundleUrlsFromRss().Distinct().Where(x => x != "https://www.humblebundle.com/subscription").ToList();
             }
 
             _visitedUrls.Add(url);
@@ -70,7 +64,6 @@ namespace HumbleBundleBot
 
             if (url == BaseUrl)
             {
-                //VisitOtherPages(BundlesTab);
                 VisitOtherPages(BundleUrls);
             }
             else
