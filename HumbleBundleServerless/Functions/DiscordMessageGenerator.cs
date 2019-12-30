@@ -3,6 +3,8 @@ using HumbleBundleServerless.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -50,15 +52,25 @@ namespace HumbleBundleServerless
                     {
                         name = "Humble Bundle",
                         url = bundle.URL
+                    },
+                    fields = new List<EmbedField>()
+                {
+                    new EmbedField
+                    {
+                        name = "Powered By",
+                        value = "https://github.com/cswendrowski/HumbleBundleBot"
                     }
+                }
                 });
+
+                var random = new Random();
 
                 foreach (var section in bundle.Sections)
                 {
                     var embed = new DiscordEmbed
                     {
                         title = section.Title,
-                        url = bundle.URL,
+                        url = bundle.URL + "?dedupe=" + random.Next(),
                         description = ""
                     };
 
@@ -76,7 +88,7 @@ namespace HumbleBundleServerless
                             embed = new DiscordEmbed
                             {
                                 title = section.Title + " (Continued)",
-                                url = bundle.URL,
+                                url = bundle.URL + "?dedupe=" + random.Next(),
                                 description = ""
                             };
                         }
