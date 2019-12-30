@@ -4,7 +4,7 @@
 [![Build status](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_apis/build/status/HumbleBundleBot%20CI)](https://ironmoosedevelopment.visualstudio.com/Iron%20Moose%20Development/_build/latest?definitionId=18)
 ![](https://ironmoosedevelopment.vsrm.visualstudio.com/_apis/public/Release/badge/94ed5e56-0dc7-4503-a43d-3f1f8a8240e1/1/1)
 [![](https://img.shields.io/badge/Chat-On%20Discord-orange.svg)](https://discord.gg/A7NBpcC)
-[![](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-%243-orange)](buymeacoff.ee/T2tZvWJ)
+[![](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-%243-orange)](https://www.buymeacoffee.com/T2tZvWJ)
 
 Scrapes HumbleBundle.com for new Bundles and posts new bundles to different webhooks whenever a new Bundle shows up.
 Each Bundle can be sent to a different webhook, allowing easy organization of messages - in Discord, each channel can have webhooks associated with them for integrations like this.
