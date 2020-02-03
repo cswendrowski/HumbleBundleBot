@@ -40,7 +40,7 @@ namespace HumbleBundleBot
         {
             ScrapePage(BaseUrl);
 
-            return _foundBundles;
+            return _foundBundles.Where(x => !x.Name.Contains("Humble Choice")).ToList();
         }
 
         private void ScrapePage(string url)
@@ -56,7 +56,10 @@ namespace HumbleBundleBot
 
             if (!BundleUrls.Any())
             {
-                BundleUrls = GetBundleUrlsFromRss().Distinct().Where(x => x != "https://www.humblebundle.com/subscription").ToList();
+                BundleUrls = GetBundleUrlsFromRss().Distinct().Where(x => 
+                    !string.IsNullOrEmpty(x) && 
+                    x != "https://www.humblebundle.com/subscription"
+                    ).ToList();
             }
 
             _visitedUrls.Add(url);
@@ -186,7 +189,16 @@ namespace HumbleBundleBot
                 var end = summary.IndexOf("\" class=\"more-link\"");
                 var blogUrl = summary.Substring(start, end - start);
 
-                yield return ScrapeBlogPost(blogUrl);
+                var bundleUrl = "";
+                try
+                {
+                    bundleUrl = ScrapeBlogPost(blogUrl);
+                }
+                catch
+                {
+                
+                }
+                yield return bundleUrl;
             }
         }
 
@@ -210,6 +222,13 @@ namespace HumbleBundleBot
                             var response = document.DocumentNode;
 
                             var learnMoreButton = response.CssSelect(".wp-block-button__link").First();
+                            var href = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "href");
+
+                            if (href == null)
+                            {
+                                throw new Exception("Could not get bundle href");
+                            }
+
                             var badHref = learnMoreButton.Attributes["href"].Value;
 
                             if (badHref == "https://www.humblebundle.com/monthly") return badHref;
