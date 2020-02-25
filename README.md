@@ -185,6 +185,43 @@ Example of subscribing to the Games Bundle with a `Discord` webhook:
 
 Webhook URLs are encrypted before they are stored.
 
+## How To Test a Registered Webhook
+*All requests to the endpoints require a header of `Content-Type: application/json`*
+
+This endpoint will lookup your registered webhook and, if it exists, send a recent Bundle of that type to your webhook. You can also specify which bundle you want if you just registered and want a current bundle.
+
+Make a HTTP POST request to https://humblebundlenotifications.azurewebsites.net/api/TestWebhook with a Body of the following format:
+
+```
+{
+    "type": <Valid Bundle Type Code>,
+    "webhook": "<YOUR DISCORD WEBHOOK URL>",
+    "webhookType": <Valid Webhook Type Code>,
+    "bundleName": "<OPTIONAL: If included, will look for a particular bundle to send. Case insensitive>"
+}
+```
+
+Example of testing a registered webhook for the Games Bundle with a `Discord` webhook:
+
+```json
+{
+    "type": 0,
+    "webhook": "https://discordapp.com/api/webhooks/abcd123...",
+    "webhookType": 0
+}
+```
+
+Specific bundle:
+
+```json
+{
+    "type": 0,
+    "webhook": "https://discordapp.com/api/webhooks/abcd123...",
+    "webhookType": 0,
+    "bundleName": "Super Cool Bundle"
+}
+```
+
 ## How to remove a registered Webhook
 
 *All requests to the endpoints require a header of `Content-Type: application/json`*
