@@ -8,6 +8,9 @@
         SOFTWARE,
         SPECIAL,
         DEVELOPER_MESSAGES,
-        ALL
+        ALL,
+        RPG,
+        COMIC,
+        BOOK_OTHER
     }
 }
