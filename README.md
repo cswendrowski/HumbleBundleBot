@@ -24,6 +24,8 @@ https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks
 [https://humblebundlenotificationssite.azurewebsites.net](https://humblebundlenotificationssite.azurewebsites.net/)
 
 ## Changelog
+`7/15/2020` - You can now register for subtypes of BOOKS, such as RPG and COMIC
+
 `3/13/2019` - Thanks to [BallBrian](https://github.com/ballbrian), we now have a nice blazor powered registration site! Check it out here: [https://humblebundlenotificationssite.azurewebsites.net](https://humblebundlenotificationssite.azurewebsites.net/)
 
 `1/8/2019` - In response to popular demand, you can now *optionally* register a [Humble Bundle Partner](https://www.humblebundle.com/partner) referral that will be attached to all messages for *your webhook only*. This means that if you're a streamer who runs your own Discord and want your audience to be able to throw some of their purchase money at you, you can signup with Humble Bundle and register your partner name here to make it happen!
@@ -122,6 +124,13 @@ The following Bundle types are valid:
 | Mixed (Mixed Content Bundles)  | 4 |
 | Developer Messages (Valid for Discord only)| 5  |
 | All Bundles | 6         |
+
+Books is a fairly large bundle type, so the following subtypes are available if you don't want the entire type:
+| Type        | Type Code |
+| ----------- | --------- |
+| RPG       | 7         |
+| Comics       | 8         |
+| Book Other (Not RPG / Comics)      | 9         |
 
 The following Webhook types are valid:
 
