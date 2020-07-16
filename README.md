@@ -125,7 +125,7 @@ The following Bundle types are valid:
 | Developer Messages (Valid for Discord only)| 5  |
 | All Bundles | 6         |
 
-Books is a fairly large bundle type, so the following subtypes are available if you don't want the entire type:
+Books is a fairly large bundle type, so the following subtypes are additionally available if you don't want the entire type (register like other Bundle types):
 | Type        | Type Code |
 | ----------- | --------- |
 | RPG       | 7         |
