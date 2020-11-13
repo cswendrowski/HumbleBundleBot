@@ -58,7 +58,7 @@ namespace HumbleBundleBot
             {
                 BundleUrls = GetBundleUrlsFromRss().Distinct().Where(x => 
                     !string.IsNullOrEmpty(x) && 
-                    x != "https://www.humblebundle.com/subscription"
+                    !x.Contains("/subscription")
                     ).ToList();
             }
 
@@ -229,15 +229,22 @@ namespace HumbleBundleBot
                                 throw new Exception("Could not get bundle href");
                             }
 
-                            var badHref = learnMoreButton.Attributes["href"].Value;
+                            var buttonHref = learnMoreButton.Attributes["href"].Value;
 
-                            if (badHref == "https://www.humblebundle.com/monthly") return badHref;
+                            if (buttonHref == "https://www.humblebundle.com/monthly") return buttonHref;
 
-                            var start = badHref.IndexOf("www.humblebundle.com");
-                            var end = badHref.IndexOf("utm_source");
-                            var goodUrl = badHref.Substring(start, end - start);
+                            if (buttonHref.Contains("utm_source"))
+                            {
+                                var start = buttonHref.IndexOf("www.humblebundle.com");
+                                var end = buttonHref.IndexOf("utm_source");
+                                var goodUrl = buttonHref.Substring(start, end - start);
 
-                            return goodUrl;
+                                return goodUrl;
+                            }
+                            else
+                            {
+                                return buttonHref;
+                            }
                         }
                     }
 
