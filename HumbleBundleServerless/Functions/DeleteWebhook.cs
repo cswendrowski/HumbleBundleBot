@@ -41,7 +41,7 @@ namespace HumbleBundleServerless.Functions
 
             if (webhookTypeValue == WebhookType.Discord)
             {
-                if (!webhook.Contains("discordapp.com/api/webhooks/"))
+                if (!webhook.Contains("discordapp.com/api/webhooks/") && !webhook.Contains("discord.com/api/webhooks/"))
                 {
                     return req.CreateResponse(HttpStatusCode.BadRequest,
                         "Please pass in a valid Discord Webhook URL in the request body");

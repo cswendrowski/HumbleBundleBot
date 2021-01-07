@@ -168,38 +168,51 @@ namespace HumbleBundleBot
             reader.Close();
 
             var lookbackTime = DateTime.UtcNow.AddDays(-21);
+            var toReturn = new List<string>();
 
             foreach (var item in feed.Items.Where(x => x.PublishDate >= lookbackTime))
             {
                 var categories = item.Categories.Select(x => x.Name).Distinct();
-                var summary = item.Summary.Text;
+                var link = item.Links.First().Uri.ToString();
 
                 if (categories.Contains("humble trove") || categories.Contains("humble store"))
                 {
                     continue;
                 }
 
-                var start = summary.IndexOf("https://blog.humblebundle.com");
+                var start = link.IndexOf("https://blog.humblebundle.com");
 
                 if (start == -1)
                 {
                     continue;
                 } 
 
-                var end = summary.IndexOf("\" class=\"more-link\"");
-                var blogUrl = summary.Substring(start, end - start);
-
-                var bundleUrl = "";
+                var end = link.IndexOf("?utm_source=rss");
                 try
                 {
-                    bundleUrl = ScrapeBlogPost(blogUrl);
+                    var blogUrl = link.Substring(start, end - start);
+
+                    var bundleUrl = "";
+                    try
+                    {
+                        bundleUrl = ScrapeBlogPost(blogUrl);
+                    }
+                    catch
+                    {
+
+                    }
+                    if (bundleUrl.Contains("www."))
+                    {
+                        toReturn.Add(bundleUrl);
+                    }
                 }
-                catch
+                catch (Exception e)
                 {
-                
+                    
                 }
-                yield return bundleUrl;
             }
+
+            return toReturn;
         }
 
         private static string ScrapeBlogPost(string blogUrl)
@@ -222,14 +235,14 @@ namespace HumbleBundleBot
                             var response = document.DocumentNode;
 
                             var learnMoreButton = response.CssSelect(".wp-block-button__link").First();
-                            var href = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "href");
+                            var href = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "rel");
 
                             if (href == null)
                             {
                                 throw new Exception("Could not get bundle href");
                             }
 
-                            var buttonHref = learnMoreButton.Attributes["href"].Value;
+                            var buttonHref = learnMoreButton.Attributes["rel"].Value;
 
                             if (buttonHref == "https://www.humblebundle.com/monthly") return buttonHref;
 
