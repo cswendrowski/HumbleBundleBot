@@ -235,14 +235,24 @@ namespace HumbleBundleBot
                             var response = document.DocumentNode;
 
                             var learnMoreButton = response.CssSelect(".wp-block-button__link").First();
-                            var href = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "rel");
+                            var href = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "href");
+                            var rel = learnMoreButton.Attributes.FirstOrDefault(x => x.Name == "rel");
 
-                            if (href == null)
+                            if (href == null && rel == null)
                             {
                                 throw new Exception("Could not get bundle href");
                             }
 
-                            var buttonHref = learnMoreButton.Attributes["rel"].Value;
+                            var buttonHref = string.Empty;
+
+                            if (href != null)
+                            {
+                                buttonHref = learnMoreButton.Attributes["href"].Value;
+                            }
+                            else if (rel != null)
+                            {
+                                buttonHref = learnMoreButton.Attributes["rel"].Value;
+                            }
 
                             if (buttonHref == "https://www.humblebundle.com/monthly") return buttonHref;
 
